@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Tracktor</string>
+    <string name="timeLabel">Время:</string>
+    <string name="distanceLabel">Расстояние:</string>
+    <string name="start">Старт</string>
+    <string name="stop">Стоп</string>
+    <string name="statistic">Статистика</string>
+    <string name="settings">Настройки</string>
 </resources>
