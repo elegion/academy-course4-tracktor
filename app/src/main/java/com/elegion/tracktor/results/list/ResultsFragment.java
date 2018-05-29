@@ -1,8 +1,10 @@
 package com.elegion.tracktor.results.list;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,33 +13,26 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.elegion.tracktor.R;
+import com.elegion.tracktor.data.RealmRepository;
+import com.elegion.tracktor.utils.CustomViewModelFactory;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class ResultsFragment extends Fragment {
 
+    @BindView(R.id.recycler)
+    RecyclerView mRecyclerView;
+
     private OnItemClickListener mListener;
+    private ResultsViewModel mResultsViewModel;
+    private ResultsAdapter mResultsAdapter;
 
     public ResultsFragment() {
     }
 
     public static ResultsFragment newInstance() {
         return new ResultsFragment();
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fr_results, container, false);
-
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-
-            // TODO: 29.05.2018 get data from repository
-//            recyclerView.setAdapter(new ResultsAdapter(, mListener));
-        }
-        return view;
     }
 
     @Override
@@ -49,6 +44,34 @@ public class ResultsFragment extends Fragment {
             throw new RuntimeException(context.toString()
                     + " must implement OnItemClickListener");
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        CustomViewModelFactory factory = new CustomViewModelFactory(new RealmRepository());
+        mResultsViewModel = ViewModelProviders.of(this, factory).get(ResultsViewModel.class);
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fr_results, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mResultsAdapter = new ResultsAdapter(mListener);
+        mResultsViewModel.getTracks().observe(this, tracks -> mResultsAdapter.submitList(tracks));
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(mResultsAdapter);
     }
 
     @Override
