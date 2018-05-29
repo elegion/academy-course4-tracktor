@@ -1,4 +1,4 @@
-package com.elegion.tracktor;
+package com.elegion.tracktor.ui;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -12,6 +12,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.Toast;
+
+import com.elegion.tracktor.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,8 +30,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        getSupportFragmentManager().beginTransaction().replace(R.id.counterContainer, new CounterFragment()).commit();
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.counterContainer, new com.elegion.tracktor.ui.CounterFragment())
+                    .commit();
+        }
     }
 
     @Override

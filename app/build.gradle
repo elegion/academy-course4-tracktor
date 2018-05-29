@@ -47,5 +47,25 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.1.14'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
 
+    // ViewModel and LiveData
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    // alternatively - just ViewModel
+    //implementation "android.arch.lifecycle:viewmodel:1.1.1"
+    // alternatively - just LiveData
+    //implementation "android.arch.lifecycle:livedata:$lifecycle_version"
+    // alternatively - Lifecycles only (no ViewModel or LiveData).
+    //     Support library depends on this lightweight import
+    implementation "android.arch.lifecycle:runtime:1.1.1"
+
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+    // alternately - if using Java8, use the following instead of compiler
+    implementation "android.arch.lifecycle:common-java8:1.1.1"
+
+    // optional - ReactiveStreams support for LiveData
+    implementation "android.arch.lifecycle:reactivestreams:1.1.1"
+
+    // optional - Test helpers for LiveData
+    //testImplementation "android.arch.core:core-testing:1.1.1"
+
     implementation 'org.greenrobot:eventbus:3.1.1'
 }
