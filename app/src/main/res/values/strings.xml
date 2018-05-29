@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Tracktor</string>
+
+    <string name="menu_item_results">Results</string>
 </resources>
