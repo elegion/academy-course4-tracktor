@@ -73,14 +73,10 @@ public class MainActivity extends AppCompatActivity {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
                     .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало.")
-                    .setPositiveButton("ОК", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            //Prompt the user once explanation has been shown
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    LOCATION_REQUEST_CODE);
-                        }
+                    .setPositiveButton("ОК", (dialogInterface, i) -> {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                LOCATION_REQUEST_CODE);
                     })
                     .create()
                     .show();
