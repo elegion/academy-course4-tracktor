@@ -23,11 +23,16 @@ import butterknife.ButterKnife;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener,
+        OnMapReadyCallback {
 
     public static final int LOCATION_REQUEST_CODE = 99;
 
     @BindView(R.id.counterContainer) FrameLayout counterContainer;
+
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         if (savedInstanceState == null) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.counterContainer, new CounterFragment())
@@ -64,9 +72,26 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        initMap();
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
+
     private void initMap() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
-            Toast.makeText(this, "Разрешения получены!", Toast.LENGTH_SHORT).show();
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.setOnMyLocationClickListener(this);
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
