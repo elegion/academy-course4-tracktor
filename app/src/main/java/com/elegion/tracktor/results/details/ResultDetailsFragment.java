@@ -1,9 +1,18 @@
 package com.elegion.tracktor.results.details;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import com.elegion.tracktor.R;
+import com.elegion.tracktor.data.RealmRepository;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * @author Azret Magometov
@@ -11,6 +20,7 @@ import android.widget.Toast;
 public class ResultDetailsFragment extends Fragment {
 
     private static final String TRACK_ID = "id";
+
     private long mTrackId;
 
     public static ResultDetailsFragment newInstance(long id) {
@@ -29,9 +39,23 @@ public class ResultDetailsFragment extends Fragment {
         }
     }
 
+    @Nullable
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Toast.makeText(getActivity(), String.valueOf(mTrackId), Toast.LENGTH_SHORT).show();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fr_result_detail, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
+    }
+
+    @OnClick(R.id.btn_delete_result)
+    public void onDeleteResultClick() {
+        RealmRepository realmRepository = new RealmRepository();
+        if (realmRepository.deleteItem(mTrackId)) {
+            getActivity().onBackPressed();
+        }
     }
 }
