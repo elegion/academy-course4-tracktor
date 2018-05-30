@@ -1,9 +1,9 @@
 package com.elegion.tracktor.ui;
 
 import android.Manifest;
-import android.content.DialogInterface;
-import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -14,23 +14,36 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.elegion.tracktor.R;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+public class MainActivity extends AppCompatActivity
+        implements GoogleMap.OnMyLocationButtonClickListener,
+        GoogleMap.OnMyLocationClickListener,
+        OnMapReadyCallback {
 
     public static final int LOCATION_REQUEST_CODE = 99;
 
-    @BindView(R.id.mapContainer) FrameLayout mapContainer;
     @BindView(R.id.counterContainer) FrameLayout counterContainer;
+
+    private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         if (savedInstanceState == null) {
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.counterContainer, new CounterFragment())
@@ -60,24 +73,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        checkPermissions();
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        initMap();
     }
 
-    private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            //mMap.setMyLocationEnabled(true);
-            Toast.makeText(this, "Разрешения уже получены!", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
+
+    private void initMap() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.setOnMyLocationButtonClickListener(this);
+            mMap.setOnMyLocationClickListener(this);
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
-                    .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало.")
-                    .setPositiveButton("ОК", (dialogInterface, i) -> {
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                LOCATION_REQUEST_CODE);
-                    })
+                    .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало")
+                    .setPositiveButton("ОК", (dialogInterface, i) ->
+                            ActivityCompat.requestPermissions(MainActivity.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    LOCATION_REQUEST_CODE))
                     .create()
                     .show();
         }
@@ -88,11 +110,9 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == LOCATION_REQUEST_CODE) {
             if (permissions.length == 1 &&
                     permissions[0].equalsIgnoreCase(Manifest.permission.ACCESS_FINE_LOCATION) &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                //mMap.setMyLocationEnabled(true);
-                Toast.makeText(this, "Вы дали разрешения!", Toast.LENGTH_SHORT).show();
+                    grantResults[0] == PERMISSION_GRANTED) {
+                initMap();
             } else {
-                // Permission was denied. Display an error message.
                 Toast.makeText(this, "Вы не дали разрешения!", Toast.LENGTH_SHORT).show();
             }
         }
