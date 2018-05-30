@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
+    private String mProvider;
     private LocationListener mLocationListener = new ChangeLocationListener() {
         @Override
         public void onLocationChanged(Location location) {
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
             mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
+                    mProvider,
                     UPDATE_CURRENT_LOCATION_MIN_TIME_MS,
                     UPDATE_CURRENT_LOCATION_MIN_DISTANCE,
                     mLocationListener);
@@ -135,8 +136,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        initMap();
+        boolean gpsEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean networkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if (!gpsEnabled && !networkEnabled) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Включите Интернет и перезайдите в приложение!", Toast.LENGTH_LONG);
+            toast.show();
+        } else {
+            mProvider = mLocationManager.getBestProvider(new Criteria(), true);
+            initMap();
+        }
     }
 
     @Override
