@@ -34,7 +34,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class MainActivity extends AppCompatActivity
         implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        OnMapReadyCallback {
+        OnMapReadyCallback,
+        LocationListener {
 
     public static final int LOCATION_REQUEST_CODE = 99;
     public static final int UPDATE_CURRENT_LOCATION_MIN_TIME_MS = 2000;
