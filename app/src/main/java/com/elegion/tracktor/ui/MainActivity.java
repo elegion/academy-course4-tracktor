@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
+    private String mProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, this);
+            mLocationManager.requestLocationUpdates(mProvider, 2000, 10, this);
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
@@ -115,8 +116,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         mLocationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        initMap();
+        boolean gpsEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        boolean networkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if (!gpsEnabled && !networkEnabled) {
+            Toast toast = Toast.makeText(getApplicationContext(), "Включите Интернет и перезайдите в приложение!", Toast.LENGTH_LONG);
+            toast.show();
+        } else {
+            mProvider = mLocationManager.getBestProvider(new Criteria(), true);
+            initMap();
+        }
     }
 
     @Override
