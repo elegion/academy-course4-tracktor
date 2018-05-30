@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity
         boolean networkEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
         if (!gpsEnabled && !networkEnabled) {
-            Toast toast = Toast.makeText(getApplicationContext(), "Включите Интернет и перезайдите в приложение!", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getApplicationContext(), "Включите Интернет, GPS и перезайдите в приложение!", Toast.LENGTH_LONG);
             toast.show();
         } else {
             mProvider = mLocationManager.getBestProvider(new Criteria(), true);
