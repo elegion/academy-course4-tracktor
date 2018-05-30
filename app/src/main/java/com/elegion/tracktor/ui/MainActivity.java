@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало")
                     .setPositiveButton("ОК", (dialogInterface, i) ->
                             ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                                     LOCATION_REQUEST_CODE))
                     .create()
                     .show();
