@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.counterContainer, new com.elegion.tracktor.ui.CounterFragment())
+                    .replace(R.id.counterContainer, new CounterFragment())
                     .commit();
         }
     }
