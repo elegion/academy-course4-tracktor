@@ -3,12 +3,13 @@ package com.elegion.tracktor.results;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.data.RealmRepository;
 import com.elegion.tracktor.data.model.Track;
+import com.elegion.tracktor.results.details.ResultDetailsFragment;
 import com.elegion.tracktor.results.list.ResultsFragment;
 
 import java.util.Date;
@@ -48,14 +49,22 @@ public class ResultsActivity extends AppCompatActivity implements ResultsFragmen
     }
 
     private void changeFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, fragment)
-                .addToBackStack(fragment.getClass().getSimpleName())
-                .commit();
+
+        boolean shouldAddToBackStack = getSupportFragmentManager().findFragmentById(R.id.container) != null;
+
+        FragmentTransaction transaction = getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, fragment);
+
+        if (shouldAddToBackStack) {
+            transaction.addToBackStack(fragment.getClass().getSimpleName());
+        }
+
+        transaction.commit();
     }
 
     @Override
     public void onClick(long trackId) {
-        Toast.makeText(this, String.valueOf(trackId), Toast.LENGTH_SHORT).show();
+        changeFragment(ResultDetailsFragment.newInstance(trackId));
     }
 }
