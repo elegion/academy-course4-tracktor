@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity
             mMap.addMarker(new MarkerOptions()
                     .position(position)
                     .title("Current Position"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(position));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
         }
     }
 
