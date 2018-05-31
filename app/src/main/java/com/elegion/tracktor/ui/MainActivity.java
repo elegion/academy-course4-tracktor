@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult != null && mMap != null) {
-                //mMap.clear(); move this into stop route event
+                //mMap.clear(); move this into start route event
                 if (mLastLocation != null) {
                     Location newLocation = locationResult.getLastLocation();
                     mMap.addPolyline(new PolylineOptions()
