@@ -24,7 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,21 +46,22 @@ public class MainActivity extends AppCompatActivity
 
     private GoogleMap mMap;
     private FusedLocationProviderClient mFusedLocationClient;
+    private Location mLastLocation;
     private LocationRequest mLocationRequest = new LocationRequest();
     private LocationCallback mLocationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
-            if (locationResult != null) {
-                // todo handle location result
-                if (mMap != null) {
-                    mMap.clear();
-                    Location lastLocation = locationResult.getLastLocation();
-                    LatLng position = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    mMap.addMarker(new MarkerOptions()
-                            .position(position)
-                            .title("Текущее местоположение"));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+            if (locationResult != null && mMap != null) {
+                //mMap.clear(); move this into start route event
+                if (mLastLocation != null) {
+                    Location newLocation = locationResult.getLastLocation();
+                    mMap.addPolyline(new PolylineOptions()
+                            .add(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),
+                                    new LatLng(newLocation.getLatitude(), newLocation.getLongitude())));
                 }
+                mLastLocation = locationResult.getLastLocation();
+                LatLng position = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
             }
         }
     };
