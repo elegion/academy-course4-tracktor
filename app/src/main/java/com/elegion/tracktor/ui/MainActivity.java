@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import com.elegion.tracktor.ChangeLocationListener;
 import com.elegion.tracktor.R;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,15 +34,30 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 public class MainActivity extends AppCompatActivity
         implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        OnMapReadyCallback,
-        LocationListener {
+        OnMapReadyCallback {
 
     public static final int LOCATION_REQUEST_CODE = 99;
+    public static final int UPDATE_CURRENT_LOCATION_MIN_TIME_MS = 2000;
+    public static final int UPDATE_CURRENT_LOCATION_MIN_DISTANCE = 10;
+    public static final int DEFAULT_ZOOM = 15;
 
     @BindView(R.id.counterContainer) FrameLayout counterContainer;
 
     private GoogleMap mMap;
     private LocationManager mLocationManager;
+    private LocationListener mLocationListener = new ChangeLocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            if (mMap != null) {
+                mMap.clear();
+                LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+                mMap.addMarker(new MarkerOptions()
+                        .position(position)
+                        .title("Current Position"));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +102,11 @@ public class MainActivity extends AppCompatActivity
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
-            mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, this);
+            mLocationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    UPDATE_CURRENT_LOCATION_MIN_TIME_MS,
+                    UPDATE_CURRENT_LOCATION_MIN_DISTANCE,
+                    mLocationListener);
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
@@ -126,32 +146,5 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onMyLocationButtonClick() {
         return false;
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        if (mMap != null) {
-            mMap.clear();
-            LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
-            mMap.addMarker(new MarkerOptions()
-                    .position(position)
-                    .title("Current Position"));
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
-        }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
     }
 }
