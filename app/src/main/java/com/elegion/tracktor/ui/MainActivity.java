@@ -14,9 +14,6 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.elegion.tracktor.R;
-import com.elegion.tracktor.event.GetRouteEvent;
-import com.elegion.tracktor.event.StartRouteEvent;
-import com.elegion.tracktor.event.StopRouteEvent;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -28,13 +25,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,8 +45,6 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.counterContainer) FrameLayout counterContainer;
 
     private GoogleMap mMap;
-    private List<LatLng> mRoute = new ArrayList<>();
-    private boolean isRouteStarted;
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
     private LocationRequest mLocationRequest = new LocationRequest();
@@ -64,12 +52,12 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult != null && mMap != null) {
-                if (mLastLocation != null && isRouteStarted) {
+                //mMap.clear(); move this into start route event
+                if (mLastLocation != null) {
                     Location newLocation = locationResult.getLastLocation();
-                    LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
                     mMap.addPolyline(new PolylineOptions()
-                            .add(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), newPosition));
-                    mRoute.add(newPosition);
+                            .add(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()),
+                                    new LatLng(newLocation.getLatitude(), newLocation.getLongitude())));
                 }
                 mLastLocation = locationResult.getLastLocation();
                 LatLng position = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
@@ -99,33 +87,6 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.counterContainer, new CounterFragment())
                     .commit();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        EventBus.getDefault().register(this);
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        EventBus.getDefault().unregister(this);
-        super.onPause();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStartRoute(StartRouteEvent event) {
-        mMap.clear();
-        mRoute.clear();
-        isRouteStarted = true;
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStopRoute(StopRouteEvent event) {
-        EventBus.getDefault().post(new GetRouteEvent(mRoute));
-        isRouteStarted = false;
-
-        Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
