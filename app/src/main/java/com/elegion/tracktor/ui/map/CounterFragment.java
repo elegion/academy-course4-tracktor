@@ -1,9 +1,6 @@
-package com.elegion.tracktor.ui;
+package com.elegion.tracktor.ui.map;
 
 import android.annotation.SuppressLint;
-import android.arch.lifecycle.LifecycleObserver;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LifecycleRegistry;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
