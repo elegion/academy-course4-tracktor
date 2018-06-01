@@ -14,7 +14,8 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.elegion.tracktor.R;
-import com.elegion.tracktor.event.GetRouteEvent;
+import com.elegion.tracktor.event.AddPositionToRouteEvent;
+import com.elegion.tracktor.event.GetFullRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -49,13 +50,12 @@ public class MainActivity extends AppCompatActivity
     public static final int LOCATION_REQUEST_CODE = 99;
     public static final int UPDATE_INTERVAL = 5000;
     public static final int UPDATE_FASTEST_INTERVAL = 2000;
-    public static final int UPDATE_MIN_DISTANCE = 10;
+    public static final int UPDATE_MIN_DISTANCE = 20;
     public static final int DEFAULT_ZOOM = 15;
 
     @BindView(R.id.counterContainer) FrameLayout counterContainer;
 
     private GoogleMap mMap;
-    private List<LatLng> mRoute = new ArrayList<>();
     private boolean isRouteStarted;
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity
                     LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
                     mMap.addPolyline(new PolylineOptions()
                             .add(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), newPosition));
-                    mRoute.add(newPosition);
+                    EventBus.getDefault().post(new AddPositionToRouteEvent(newPosition));
                 }
                 mLastLocation = locationResult.getLastLocation();
                 LatLng position = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
@@ -117,13 +117,11 @@ public class MainActivity extends AppCompatActivity
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStartRoute(StartRouteEvent event) {
         mMap.clear();
-        mRoute.clear();
         isRouteStarted = true;
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStopRoute(StopRouteEvent event) {
-        EventBus.getDefault().post(new GetRouteEvent(mRoute));
         isRouteStarted = false;
 
         Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
