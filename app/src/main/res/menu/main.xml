@@ -8,4 +8,10 @@
         android:title="@string/menu_item_results"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/mi_preferences"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/menu_item_results"
+        app:showAsAction="ifRoom" />
+
 </menu>

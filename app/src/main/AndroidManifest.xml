@@ -10,17 +10,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".RealmTestActivity">
-
-        </activity>
-        <activity android:name=".main.MainActivity">
+        <activity android:name=".RealmTestActivity"></activity>
+        <activity
+            android:name=".main.MainActivity"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".results.ResultsActivity"></activity>
+        <activity android:name=".results.ResultsActivity" />
+        <activity
+            android:name=".preferences.PreferenceActivity"
+            android:label="@string/title_activity_preference"
+            android:theme="@style/PreferenceFixTheme.Light"></activity>
     </application>
 
 </manifest>

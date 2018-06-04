@@ -2,19 +2,18 @@ package com.elegion.tracktor.results;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.data.RealmRepository;
 import com.elegion.tracktor.data.model.Track;
+import com.elegion.tracktor.BaseActivity;
 import com.elegion.tracktor.results.details.ResultDetailsFragment;
 import com.elegion.tracktor.results.list.ResultsFragment;
 
 import java.util.Date;
 
-public class ResultsActivity extends AppCompatActivity implements ResultsFragment.OnItemClickListener {
+public class ResultsActivity extends BaseActivity implements ResultsFragment.OnItemClickListener {
 
     public static void start(AppCompatActivity activity) {
         Intent intent = new Intent(activity, ResultsActivity.class);
@@ -46,21 +45,6 @@ public class ResultsActivity extends AppCompatActivity implements ResultsFragmen
             realmRepository.insertItem(track);
         }
 
-    }
-
-    private void changeFragment(Fragment fragment) {
-
-        boolean shouldAddToBackStack = getSupportFragmentManager().findFragmentById(R.id.container) != null;
-
-        FragmentTransaction transaction = getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container, fragment);
-
-        if (shouldAddToBackStack) {
-            transaction.addToBackStack(fragment.getClass().getSimpleName());
-        }
-
-        transaction.commit();
     }
 
     @Override
