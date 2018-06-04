@@ -6,15 +6,23 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_section_unit">Единица измерения</string>
-    <string name="dialog_title_list_preference_unit">Выберите единицу измерения</string>
-    <string name="title_section_auto_shutdown">Автоотключение</string>
-    <string name="dialog_title_list_preference_auto_shutdown">Выберите время автоотключения</string>
-    <string name="title_section_weight">Вес пользователя</string>
-    <string name="title_edittext_preference">Вес пользователя</string>
-    <string name="title_intent_preference">О приложении</string>
+
     <string name="title_activity_preference">Настройки</string>
+    <string name="preferences_category_common">Общие</string>
+
+    <string name="title_distance_unit">Единица измерения</string>
+    <string name="dialog_title_distance_unit">Выберите единицу измерения</string>
+    <string name="title_auto_shutdown">Автоотключение</string>
+    <string name="dialog_title_auto_shutdown">Выберите время автоотключения</string>
+    <string name="title_user_weight">Вес пользователя</string>
+    <string name="dialog_title_user_weight">Вес пользователя</string>
+    <string name="title_about_app">О приложении</string>
+
+
     <string name="pref_key_unit">unit</string>
     <string name="pref_key_shutdown">shutdown</string>
     <string name="pref_key_weight">weight</string>
+    <string name="pref_default_value_unit">1</string>
+    <string name="pref_default_value_shutdown">0</string>
+    <string name="pref_default_value_weight">60</string>
 </resources>

@@ -2,6 +2,7 @@ package com.elegion.tracktor.main;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -15,6 +16,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        PreferenceManager.setDefaultValues(this, R.xml.tr_pref, false);
     }
 
     @Override
@@ -28,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.mi_results) {
             ResultsActivity.start(this);
             return true;
-        } else  if (item.getItemId() == R.id.mi_preferences) {
+        } else if (item.getItemId() == R.id.mi_preferences) {
             PreferenceActivity.start(this);
             return true;
         } else {

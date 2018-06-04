@@ -14,7 +14,7 @@ public class PreferenceActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preference);
         if (savedInstanceState == null) {
-            changeFragment(TrPreferenceFragment.newInstance());
+            changeFragment(MainPreferences.newInstance());
         }
     }
 
