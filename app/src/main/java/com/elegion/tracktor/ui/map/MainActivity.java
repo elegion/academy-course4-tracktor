@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState == null) {
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mapFragment.setRetainInstance(true);
             mapFragment.getMapAsync(this);
 
             getSupportFragmentManager()

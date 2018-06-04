@@ -3,6 +3,11 @@ package com.elegion.tracktor.viewmodel;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
+import com.elegion.tracktor.event.StartRouteEvent;
+import com.elegion.tracktor.event.StopRouteEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -18,6 +23,7 @@ public class CounterViewModel extends ViewModel {
     private Disposable timerDisposable;
 
     public void startTimer() {
+        EventBus.getDefault().post(new StartRouteEvent());
         startEnabled.postValue(false);
         stopEnabled.postValue(true);
         timerDisposable = Observable.interval(1, TimeUnit.SECONDS)
@@ -27,6 +33,7 @@ public class CounterViewModel extends ViewModel {
     }
 
     public void stopTimer() {
+        EventBus.getDefault().post(new StopRouteEvent());
         startEnabled.postValue(true);
         stopEnabled.postValue(false);
         timerDisposable.dispose();

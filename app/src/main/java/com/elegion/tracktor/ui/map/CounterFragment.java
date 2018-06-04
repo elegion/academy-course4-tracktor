@@ -71,13 +71,11 @@ public class CounterFragment extends Fragment {
     @SuppressLint("CheckResult")
     @OnClick(R.id.buttonStart)
     void onStartClick() {
-        EventBus.getDefault().post(new StartRouteEvent());
         viewModel.startTimer();
     }
 
     @OnClick(R.id.buttonStop)
     void onStopClick() {
-        EventBus.getDefault().post(new StopRouteEvent());
         viewModel.stopTimer();
     }
 }
