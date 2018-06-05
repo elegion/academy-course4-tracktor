@@ -1,6 +1,9 @@
 package com.elegion.tracktor.main;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.view.Menu;
@@ -27,14 +30,28 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.mi_results) {
-            ResultsActivity.start(this);
-            return true;
-        } else if (item.getItemId() == R.id.mi_preferences) {
-            PreferenceActivity.start(this);
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.mi_results:
+                ResultsActivity.start(this);
+                return true;
+            case R.id.mi_preferences:
+                PreferenceActivity.start(this);
+                return true;
+            case R.id.mi_about:
+                launchAboutScreen();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void launchAboutScreen() {
+        CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                .setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setShowTitle(true)
+                .enableUrlBarHiding()
+                .build();
+
+        intent.launchUrl(this, Uri.parse("https://www.e-legion.com"));
     }
 }
