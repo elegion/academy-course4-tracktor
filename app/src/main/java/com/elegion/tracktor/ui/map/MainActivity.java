@@ -1,4 +1,4 @@
-package com.elegion.tracktor.ui;
+package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
 import android.location.Location;
@@ -17,6 +17,7 @@ import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
+import com.elegion.tracktor.ui.results.ResultsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -126,6 +127,9 @@ public class MainActivity extends AppCompatActivity
         isRouteStarted = false;
 
         Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
+
+        // TODO: 01.06.2018 send results to ResultsActivity/ResultsDetailsFragment
+        ResultsActivity.start(this);
     }
 
     @Override
