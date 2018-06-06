@@ -4,11 +4,11 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-public class GetRouteEvent {
+public class GetFullRouteEvent {
 
     private List<LatLng> mRoute;
 
-    public GetRouteEvent(List<LatLng> route) {
+    public GetFullRouteEvent(List<LatLng> route) {
         mRoute = route;
     }
 
