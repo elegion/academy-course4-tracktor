@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity
     public static final int UPDATE_MIN_DISTANCE = 20;
     public static final int DEFAULT_ZOOM = 15;
 
-    @BindView(R.id.counterContainer) FrameLayout counterContainer;
-
     private GoogleMap mMap;
     private boolean isRouteStarted;
     private FusedLocationProviderClient mFusedLocationClient;
@@ -125,8 +123,7 @@ public class MainActivity extends AppCompatActivity
 
         Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
 
-        // TODO: 01.06.2018 send results to ResultsActivity/ResultsDetailsFragment
-        ResultsActivity.start(this);
+        ResultsActivity.start(this, event.getDistance(), event.getTime(), event.getRoute());
     }
 
     @Override

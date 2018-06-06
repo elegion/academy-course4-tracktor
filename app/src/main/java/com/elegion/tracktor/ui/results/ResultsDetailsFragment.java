@@ -10,24 +10,32 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.elegion.tracktor.R;
+import com.elegion.tracktor.util.StringUtil;
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.elegion.tracktor.ui.results.ResultsActivity.DISTANCE_KEY;
+import static com.elegion.tracktor.ui.results.ResultsActivity.ROUTE_KEY;
+import static com.elegion.tracktor.ui.results.ResultsActivity.TIME_KEY;
 
 /**
  * @author Azret Magometov
  */
 public class ResultsDetailsFragment extends Fragment {
 
-    @BindView(R.id.tv_time)
+    @BindView(R.id.tvTime)
     TextView mTimeText;
 
-    @BindView(R.id.tv_distance)
+    @BindView(R.id.tvDistance)
     TextView mDistanceText;
 
-    public static ResultsDetailsFragment newInstance() {
-
+    public static ResultsDetailsFragment newInstance(Bundle bundle) {
         Bundle args = new Bundle();
+        args.putAll(bundle);
 
         ResultsDetailsFragment fragment = new ResultsDetailsFragment();
         fragment.setArguments(args);
@@ -45,7 +53,11 @@ public class ResultsDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
-        mTimeText.setText("Stub time");
-        mDistanceText.setText("Stub distance");
+        double distance = getArguments().getDouble(DISTANCE_KEY, 0.0);
+        long time = getArguments().getLong(TIME_KEY, 0);
+        ArrayList<LatLng> route = (ArrayList<LatLng>) getArguments().getSerializable(ROUTE_KEY);
+
+        mTimeText.setText(StringUtil.getTimeText(time));
+        mDistanceText.setText(StringUtil.getDistanceText(distance));
     }
 }
