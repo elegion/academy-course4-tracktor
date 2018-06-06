@@ -15,17 +15,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_vertical_padding_small"
-            android:text="@string/distanceLabel" />
+            android:text="@string/timeLabel" />
 
         <TextView
-            android:id="@+id/tvDistance"
+            android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_vertical_padding_small"
             android:paddingEnd="0dp"
             android:paddingStart="4dp"
-            tools:text="2412 м." />
-
+            tools:text="23:12:11" />
     </LinearLayout>
 
     <LinearLayout
@@ -37,14 +35,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/view_vertical_padding_small"
-            android:text="@string/timeLabel" />
+            android:text="@string/distanceLabel" />
 
         <TextView
-            android:id="@+id/tvTime"
+            android:id="@+id/tvDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/view_vertical_padding_small"
             android:paddingEnd="0dp"
             android:paddingStart="4dp"
-            tools:text="23:12:11" />
+            tools:text="2412 м." />
+
     </LinearLayout>
 </LinearLayout>
