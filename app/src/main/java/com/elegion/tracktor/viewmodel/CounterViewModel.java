@@ -18,7 +18,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -35,6 +34,7 @@ public class CounterViewModel extends ViewModel {
 
     private Disposable timerDisposable;
     private List<LatLng> route = new ArrayList<>();
+    private long time;
     private double distance;
 
     public CounterViewModel() {
@@ -50,23 +50,20 @@ public class CounterViewModel extends ViewModel {
         timerDisposable = Observable.interval(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(seconds -> onTimerUpdate(seconds.intValue()));
+                .subscribe(this::onTimerUpdate);
     }
 
     public void stopTimer() {
-        EventBus.getDefault().post(new StopRouteEvent());
+        EventBus.getDefault().post(new StopRouteEvent(distance, time, new ArrayList<>(route)));
         route.clear();
         startEnabled.postValue(true);
         stopEnabled.postValue(false);
         timerDisposable.dispose();
     }
 
-    private void onTimerUpdate(int totalSeconds) {
-        long hours = totalSeconds / 3600;
-        long minutes = (totalSeconds % 3600) / 60;
-        long seconds = totalSeconds % 60;
-
-        timeText.setValue(String.format(Locale.ENGLISH, "%02d:%02d:%02d", hours, minutes, seconds));
+    private void onTimerUpdate(long totalSeconds) {
+        time = totalSeconds;
+        timeText.setValue(StringUtil.getTimeText(totalSeconds));
     }
 
     public MutableLiveData<String> getTimeText() {
