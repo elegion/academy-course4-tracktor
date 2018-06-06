@@ -14,7 +14,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_vertical_padding_small"
             android:text="@string/timeLabel" />
 
         <TextView
@@ -35,14 +34,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_vertical_padding_small"
             android:text="@string/distanceLabel" />
 
         <TextView
             android:id="@+id/tvDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/view_vertical_padding_small"
             android:paddingEnd="0dp"
             android:paddingStart="4dp"
             tools:text="2412 м." />
