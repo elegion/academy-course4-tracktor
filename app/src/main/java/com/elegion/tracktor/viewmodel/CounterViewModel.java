@@ -107,7 +107,7 @@ public class CounterViewModel extends ViewModel {
             LatLng lastPosition = event.getPosition();
             double computedDistance = SphericalUtil.computeDistanceBetween(firstPosition, lastPosition);
             distance += computedDistance;
-            distanceText.postValue(StringUtil.getDistanceText(distance) + " м.");
+            distanceText.postValue(StringUtil.getDistanceText(distance));
         }
     }
 
