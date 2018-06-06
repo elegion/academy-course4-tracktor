@@ -55,7 +55,10 @@ public class CounterViewModel extends ViewModel {
 
     public void stopTimer() {
         EventBus.getDefault().post(new StopRouteEvent());
+        LatLng lastLocation = route.get(route.size() - 1);
         route.clear();
+        route.add(lastLocation);
+        distance = 0;
         startEnabled.postValue(true);
         stopEnabled.postValue(false);
         timerDisposable.dispose();

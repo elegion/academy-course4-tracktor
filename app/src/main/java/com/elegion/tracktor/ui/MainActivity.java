@@ -50,8 +50,6 @@ public class MainActivity extends AppCompatActivity
     public static final int UPDATE_MIN_DISTANCE = 20;
     public static final int DEFAULT_ZOOM = 15;
 
-    @BindView(R.id.counterContainer) FrameLayout counterContainer;
-
     private GoogleMap mMap;
     private boolean isRouteStarted;
     private FusedLocationProviderClient mFusedLocationClient;
