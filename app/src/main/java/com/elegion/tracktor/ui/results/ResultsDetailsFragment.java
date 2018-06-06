@@ -15,6 +15,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
@@ -80,6 +81,12 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        LatLng startPosition = new LatLng(mRoute.get(0).latitude, mRoute.get(0).longitude);
+        mMap.addMarker(new MarkerOptions().position(startPosition).title(getString(R.string.start)));
+
+        LatLng endPosition = new LatLng(mRoute.get(mRoute.size() - 1).latitude, mRoute.get(mRoute.size() - 1).longitude);
+        mMap.addMarker(new MarkerOptions().position(endPosition).title(getString(R.string.end)));
 
         mMap.addPolyline(new PolylineOptions().addAll(mRoute));
     }
