@@ -11,10 +11,14 @@ import android.widget.TextView;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.util.StringUtil;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -82,12 +86,20 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.addPolyline(new PolylineOptions().addAll(mRoute));
+
         LatLng startPosition = new LatLng(mRoute.get(0).latitude, mRoute.get(0).longitude);
         mMap.addMarker(new MarkerOptions().position(startPosition).title(getString(R.string.start)));
 
         LatLng endPosition = new LatLng(mRoute.get(mRoute.size() - 1).latitude, mRoute.get(mRoute.size() - 1).longitude);
         mMap.addMarker(new MarkerOptions().position(endPosition).title(getString(R.string.end)));
 
-        mMap.addPolyline(new PolylineOptions().addAll(mRoute));
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (LatLng point : mRoute) {
+            builder.include(point);
+        }
+        int padding = 100;
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
+        mMap.moveCamera(cu);
     }
 }
