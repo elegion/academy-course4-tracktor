@@ -12,10 +12,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.elegion.tracktor.NetworkUtils;
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.viewmodel.CounterViewModel;
-import com.elegion.tracktor.viewmodel.CounterViewModelFactory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,7 +34,7 @@ public class CounterFragment extends Fragment {
         View view = inflater.inflate(R.layout.fr_counter, container, false);
         ButterKnife.bind(this, view);
 
-        viewModel = ViewModelProviders.of(this, new CounterViewModelFactory(NetworkUtils.MATRIX_API)).get(CounterViewModel.class);
+        viewModel = ViewModelProviders.of(this).get(CounterViewModel.class);
         viewModel.getTimeText().observe(this, s -> tvTime.setText(s));
         viewModel.getDistanceText().observe(this, s -> tvDistance.setText(s));
         viewModel.getStartEnabled().observe(this, buttonStart::setEnabled);

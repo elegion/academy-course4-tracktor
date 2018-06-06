@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.GetFullRouteEvent;
+import com.elegion.tracktor.event.SetStartPositionToRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -33,9 +33,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -64,16 +61,17 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult != null && mMap != null) {
-                if (mLastLocation != null && isRouteStarted) {
-                    Location newLocation = locationResult.getLastLocation();
-                    LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
-                    mMap.addPolyline(new PolylineOptions()
-                            .add(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), newPosition));
+                Location newLocation = locationResult.getLastLocation();
+                LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
+                if (isRouteStarted && mLastLocation != null) {
                     EventBus.getDefault().post(new AddPositionToRouteEvent(newPosition));
+                    LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    mMap.addPolyline(new PolylineOptions().add(lastPosition, newPosition));
+                } else if (!isRouteStarted) {
+                    EventBus.getDefault().post(new SetStartPositionToRouteEvent(newPosition));
                 }
-                mLastLocation = locationResult.getLastLocation();
-                LatLng position = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, DEFAULT_ZOOM));
+                mLastLocation = newLocation;
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newPosition, DEFAULT_ZOOM));
             }
         }
     };

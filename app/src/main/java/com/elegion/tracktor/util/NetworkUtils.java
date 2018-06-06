@@ -1,4 +1,4 @@
-package com.elegion.tracktor;
+package com.elegion.tracktor.util;
 
 import com.elegion.tracktor.api.DistanceMatrixApi;
 import com.google.gson.Gson;
