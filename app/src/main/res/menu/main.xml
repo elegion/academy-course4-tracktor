@@ -14,4 +14,8 @@
         android:title="@string/menu_item_results"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/mi_about"
+        android:title="@string/menu_item_about" />
+
 </menu>

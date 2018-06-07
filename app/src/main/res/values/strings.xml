@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Tracktor</string>
 
-    <string name="menu_item_results">Results</string>
-    <string name="menu_item_preferences">Settings</string>
+    <string name="menu_item_results">Статистика</string>
+    <string name="menu_item_preferences">Настройки</string>
+    <string name="menu_item_about">О приложении</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -16,8 +17,6 @@
     <string name="dialog_title_auto_shutdown">Выберите время автоотключения</string>
     <string name="title_user_weight">Вес пользователя</string>
     <string name="dialog_title_user_weight">Вес пользователя</string>
-    <string name="title_about_app">О приложении</string>
-
 
     <string name="pref_key_unit">unit</string>
     <string name="pref_key_shutdown">shutdown</string>
