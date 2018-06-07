@@ -1,4 +1,4 @@
-package com.elegion.tracktor.ui;
+package com.elegion.tracktor.ui.map;
 
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
