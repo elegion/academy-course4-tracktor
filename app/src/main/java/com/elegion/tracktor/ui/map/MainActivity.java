@@ -123,8 +123,7 @@ public class MainActivity extends AppCompatActivity
 
         Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
 
-        // TODO: 01.06.2018 send results to ResultsActivity/ResultsDetailsFragment
-        ResultsActivity.start(this);
+        ResultsActivity.start(this, event.getDistance(), event.getTime(), event.getRoute());
     }
 
     @Override
