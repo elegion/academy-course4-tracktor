@@ -14,6 +14,7 @@ import com.elegion.tracktor.util.StringUtil;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -42,6 +43,9 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
 
     @BindView(R.id.tvDistance)
     TextView mDistanceText;
+
+    @BindView(R.id.mapView)
+    MapView mMapView;
 
     private GoogleMap mMap;
     private List<LatLng> mRoute;
@@ -73,19 +77,12 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
         mTimeText.setText(StringUtil.getTimeText(time));
         mDistanceText.setText(StringUtil.getDistanceText(distance));
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapContainer);
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            mapFragment.setRetainInstance(true);
-            getChildFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
-            mapFragment.getMapAsync(this);
-        }
+        mMapView.getMapAsync(this);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         mMap.addPolyline(new PolylineOptions().addAll(mRoute));
 
         LatLng startPosition = new LatLng(mRoute.get(0).latitude, mRoute.get(0).longitude);
