@@ -44,4 +44,10 @@
             android:paddingStart="4dp"
             tools:text="2412 м." />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/mapContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 </LinearLayout>
