@@ -1,7 +1,6 @@
 package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,7 +18,6 @@ import com.elegion.tracktor.event.SetStartPositionToRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.ui.results.ResultsActivity;
-import com.elegion.tracktor.util.ScreenshotMaker;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -132,10 +130,10 @@ public class MainActivity extends AppCompatActivity
         List<LatLng> route = event.getRoute();
         mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
 
-        ResultsActivity.start(this, event.getDistance(), event.getTime(), getMapScreenshot(route));
+        takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
     }
 
-    private Bitmap getMapScreenshot(List<LatLng> route) {
+    private void takeMapScreenshot(List<LatLng> route, GoogleMap.SnapshotReadyCallback snapshotCallback) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (LatLng point : route) {
             builder.include(point);
@@ -144,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
         mMap.moveCamera(cu);
 
-        return ScreenshotMaker.makeScreenshot(mMapFragment.getView());
+        mMap.snapshot(snapshotCallback);
     }
 
     @Override
