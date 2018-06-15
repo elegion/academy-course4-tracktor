@@ -1,6 +1,7 @@
 package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,16 +19,19 @@ import com.elegion.tracktor.event.SetStartPositionToRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.ui.results.ResultsActivity;
+import com.elegion.tracktor.util.ScreenshotMaker;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity
     public static final int DEFAULT_ZOOM = 15;
 
     private GoogleMap mMap;
+    private SupportMapFragment mMapFragment;
     private boolean isRouteStarted;
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
@@ -89,9 +94,9 @@ public class MainActivity extends AppCompatActivity
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (savedInstanceState == null) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-            mapFragment.setRetainInstance(true);
-            mapFragment.getMapAsync(this);
+            mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mMapFragment.setRetainInstance(true);
+            mMapFragment.getMapAsync(this);
 
             getSupportFragmentManager()
                     .beginTransaction()
@@ -127,7 +132,19 @@ public class MainActivity extends AppCompatActivity
         List<LatLng> route = event.getRoute();
         mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
 
-        ResultsActivity.start(this, event.getDistance(), event.getTime(), event.getRoute());
+        ResultsActivity.start(this, event.getDistance(), event.getTime(), getMapScreenshot(route));
+    }
+
+    private Bitmap getMapScreenshot(List<LatLng> route) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (LatLng point : route) {
+            builder.include(point);
+        }
+        int padding = 100;
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
+        mMap.moveCamera(cu);
+
+        return ScreenshotMaker.makeScreenshot(mMapFragment.getView());
     }
 
     @Override

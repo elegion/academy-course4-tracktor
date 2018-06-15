@@ -7,44 +7,28 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elegion.tracktor.R;
+import com.elegion.tracktor.util.ScreenshotMaker;
 import com.elegion.tracktor.util.StringUtil;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.elegion.tracktor.ui.results.ResultsActivity.DISTANCE_KEY;
-import static com.elegion.tracktor.ui.results.ResultsActivity.ROUTE_KEY;
+import static com.elegion.tracktor.ui.results.ResultsActivity.SCREENSHOT_KEY;
 import static com.elegion.tracktor.ui.results.ResultsActivity.TIME_KEY;
 
 /**
  * @author Azret Magometov
  */
-public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallback {
+public class ResultsDetailsFragment extends Fragment {
 
-    @BindView(R.id.tvTime)
-    TextView mTimeText;
-
-    @BindView(R.id.tvDistance)
-    TextView mDistanceText;
-
-    private GoogleMap mMap;
-    private List<LatLng> mRoute;
+    @BindView(R.id.tvTime) TextView mTimeText;
+    @BindView(R.id.tvDistance) TextView mDistanceText;
+    @BindView(R.id.ivScreenshot) ImageView mScreenshotImage;
 
     public static ResultsDetailsFragment newInstance(Bundle bundle) {
         Bundle args = new Bundle();
@@ -68,38 +52,9 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
 
         double distance = getArguments().getDouble(DISTANCE_KEY, 0.0);
         long time = getArguments().getLong(TIME_KEY, 0);
-        mRoute = (ArrayList<LatLng>) getArguments().getSerializable(ROUTE_KEY);
 
         mTimeText.setText(StringUtil.getTimeText(time));
         mDistanceText.setText(StringUtil.getDistanceText(distance));
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapContainer);
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            mapFragment.setRetainInstance(true);
-            getChildFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
-            mapFragment.getMapAsync(this);
-        }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        mMap.addPolyline(new PolylineOptions().addAll(mRoute));
-
-        LatLng startPosition = new LatLng(mRoute.get(0).latitude, mRoute.get(0).longitude);
-        mMap.addMarker(new MarkerOptions().position(startPosition).title(getString(R.string.start)));
-
-        LatLng endPosition = new LatLng(mRoute.get(mRoute.size() - 1).latitude, mRoute.get(mRoute.size() - 1).longitude);
-        mMap.addMarker(new MarkerOptions().position(endPosition).title(getString(R.string.end)));
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng point : mRoute) {
-            builder.include(point);
-        }
-        int padding = 100;
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
-        mMap.moveCamera(cu);
+        mScreenshotImage.setImageBitmap(ScreenshotMaker.fromBase64(getArguments().getString(SCREENSHOT_KEY)));
     }
 }
