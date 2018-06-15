@@ -127,8 +127,6 @@ public class MainActivity extends AppCompatActivity
         List<LatLng> route = event.getRoute();
         mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
 
-        Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
-
         ResultsActivity.start(this, event.getDistance(), event.getTime(), event.getRoute());
     }
 
