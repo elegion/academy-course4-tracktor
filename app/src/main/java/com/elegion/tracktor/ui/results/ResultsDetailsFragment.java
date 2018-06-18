@@ -1,50 +1,43 @@
 package com.elegion.tracktor.ui.results;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elegion.tracktor.R;
+import com.elegion.tracktor.util.ScreenshotMaker;
 import com.elegion.tracktor.util.StringUtil;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.elegion.tracktor.ui.results.ResultsActivity.DISTANCE_KEY;
-import static com.elegion.tracktor.ui.results.ResultsActivity.ROUTE_KEY;
+import static com.elegion.tracktor.ui.results.ResultsActivity.SCREENSHOT_KEY;
 import static com.elegion.tracktor.ui.results.ResultsActivity.TIME_KEY;
 
 /**
  * @author Azret Magometov
  */
-public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallback {
+public class ResultsDetailsFragment extends Fragment {
 
-    @BindView(R.id.tvTime)
-    TextView mTimeText;
+    @BindView(R.id.tvTime) TextView mTimeText;
+    @BindView(R.id.tvDistance) TextView mDistanceText;
+    @BindView(R.id.ivScreenshot) ImageView mScreenshotImage;
 
-    @BindView(R.id.tvDistance)
-    TextView mDistanceText;
-
-    private GoogleMap mMap;
-    private List<LatLng> mRoute;
+    private Bitmap mImage;
 
     public static ResultsDetailsFragment newInstance(Bundle bundle) {
         Bundle args = new Bundle();
@@ -58,6 +51,7 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fr_result_detail, container, false);
     }
 
@@ -68,38 +62,32 @@ public class ResultsDetailsFragment extends Fragment implements OnMapReadyCallba
 
         double distance = getArguments().getDouble(DISTANCE_KEY, 0.0);
         long time = getArguments().getLong(TIME_KEY, 0);
-        mRoute = (ArrayList<LatLng>) getArguments().getSerializable(ROUTE_KEY);
 
         mTimeText.setText(StringUtil.getTimeText(time));
         mDistanceText.setText(StringUtil.getDistanceText(distance));
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapContainer);
-        if (mapFragment == null) {
-            mapFragment = SupportMapFragment.newInstance();
-            mapFragment.setRetainInstance(true);
-            getChildFragmentManager().beginTransaction().replace(R.id.mapContainer, mapFragment).commit();
-            mapFragment.getMapAsync(this);
-        }
+        mImage = ScreenshotMaker.fromBase64(getArguments().getString(SCREENSHOT_KEY));
+        mScreenshotImage.setImageBitmap(mImage);
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_details_fragment, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
-        mMap.addPolyline(new PolylineOptions().addAll(mRoute));
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.actionShare) {
+            String path = MediaStore.Images.Media.insertImage(requireActivity().getContentResolver(), mImage, "Мой маршрут", null);
+            Uri uri = Uri.parse(path);
 
-        LatLng startPosition = new LatLng(mRoute.get(0).latitude, mRoute.get(0).longitude);
-        mMap.addMarker(new MarkerOptions().position(startPosition).title(getString(R.string.start)));
-
-        LatLng endPosition = new LatLng(mRoute.get(mRoute.size() - 1).latitude, mRoute.get(mRoute.size() - 1).longitude);
-        mMap.addMarker(new MarkerOptions().position(endPosition).title(getString(R.string.end)));
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng point : mRoute) {
-            builder.include(point);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("image/jpeg");
+            intent.putExtra(Intent.EXTRA_STREAM, uri);
+            intent.putExtra(Intent.EXTRA_TEXT, "Время: " + mTimeText.getText() + "\nРасстояние: " + mDistanceText.getText());
+            startActivity(Intent.createChooser(intent, "Результаты маршрута"));
         }
-        int padding = 100;
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
-        mMap.moveCamera(cu);
+        return super.onOptionsItemSelected(item);
     }
 }

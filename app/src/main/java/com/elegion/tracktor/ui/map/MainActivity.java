@@ -23,11 +23,13 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity
     public static final int DEFAULT_ZOOM = 15;
 
     private GoogleMap mMap;
+    private SupportMapFragment mMapFragment;
     private boolean isRouteStarted;
     private FusedLocationProviderClient mFusedLocationClient;
     private Location mLastLocation;
@@ -89,9 +92,9 @@ public class MainActivity extends AppCompatActivity
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (savedInstanceState == null) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-            mapFragment.setRetainInstance(true);
-            mapFragment.getMapAsync(this);
+            mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+            mMapFragment.setRetainInstance(true);
+            mMapFragment.getMapAsync(this);
 
             getSupportFragmentManager()
                     .beginTransaction()
@@ -127,9 +130,19 @@ public class MainActivity extends AppCompatActivity
         List<LatLng> route = event.getRoute();
         mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
 
-        Toast.makeText(this, "В будущем, Ваш маршрут будет сохранен!", Toast.LENGTH_SHORT).show();
+        takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+    }
 
-        ResultsActivity.start(this, event.getDistance(), event.getTime(), event.getRoute());
+    private void takeMapScreenshot(List<LatLng> route, GoogleMap.SnapshotReadyCallback snapshotCallback) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (LatLng point : route) {
+            builder.include(point);
+        }
+        int padding = 100;
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
+        mMap.moveCamera(cu);
+
+        mMap.snapshot(snapshotCallback);
     }
 
     @Override
@@ -165,7 +178,7 @@ public class MainActivity extends AppCompatActivity
                     .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало")
                     .setPositiveButton("ОК", (dialogInterface, i) ->
                             ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE))
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE}, LOCATION_REQUEST_CODE))
                     .create()
                     .show();
         }
@@ -174,7 +187,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == LOCATION_REQUEST_CODE) {
-            if (permissions.length == 1 &&
+            if (permissions.length == 2 &&
                     permissions[0].equalsIgnoreCase(Manifest.permission.ACCESS_FINE_LOCATION) &&
                     grantResults[0] == PERMISSION_GRANTED) {
                 initMap();
