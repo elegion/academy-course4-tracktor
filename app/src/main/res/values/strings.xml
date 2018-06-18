@@ -6,5 +6,6 @@
     <string name="end">Конец</string>
     <string name="stop">Стоп</string>
     <string name="statistic">Статистика</string>
+    <string name="share">Поделиться</string>
     <string name="settings">Настройки</string>
 </resources>

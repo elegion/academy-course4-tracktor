@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity
                     .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало")
                     .setPositiveButton("ОК", (dialogInterface, i) ->
                             ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE))
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE}, LOCATION_REQUEST_CODE))
                     .create()
                     .show();
         }
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == LOCATION_REQUEST_CODE) {
-            if (permissions.length == 1 &&
+            if (permissions.length == 2 &&
                     permissions[0].equalsIgnoreCase(Manifest.permission.ACCESS_FINE_LOCATION) &&
                     grantResults[0] == PERMISSION_GRANTED) {
                 initMap();
