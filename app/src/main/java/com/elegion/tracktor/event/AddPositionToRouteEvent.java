@@ -4,13 +4,19 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class AddPositionToRouteEvent {
 
-    private LatLng mPosition;
+    private LatLng mLastPosition;
+    private LatLng mNewPosition;
 
-    public AddPositionToRouteEvent(LatLng position) {
-        mPosition = position;
+    public AddPositionToRouteEvent(LatLng lastPosition, LatLng newPosition) {
+        mLastPosition = lastPosition;
+        mNewPosition = newPosition;
     }
 
-    public LatLng getPosition() {
-        return mPosition;
+    public LatLng getLastPosition() {
+        return mLastPosition;
+    }
+
+    public LatLng getNewPosition() {
+        return mNewPosition;
     }
 }

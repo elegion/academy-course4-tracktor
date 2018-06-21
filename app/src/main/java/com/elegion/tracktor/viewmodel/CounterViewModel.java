@@ -17,7 +17,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -33,16 +32,14 @@ public class CounterViewModel extends ViewModel {
     private MutableLiveData<String> distanceText = new MutableLiveData<>();
 
     private Disposable timerDisposable;
-    private List<LatLng> route = new ArrayList<>();
-    private long time;
-    private double distance;
+
 
     public CounterViewModel() {
         EventBus.getDefault().register(this);
     }
 
-    public void startTimer() {
-        EventBus.getDefault().post(new StartRouteEvent());
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void startTimer(StartRouteEvent event) {
         timeText.postValue("");
         distanceText.postValue("");
         startEnabled.postValue(false);
@@ -53,8 +50,8 @@ public class CounterViewModel extends ViewModel {
                 .subscribe(this::onTimerUpdate);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void stopTimer() {
-        EventBus.getDefault().post(new StopRouteEvent(distance, time, new ArrayList<>(route)));
         LatLng lastLocation = route.get(route.size() - 1);
         route.clear();
         route.add(lastLocation);
@@ -63,12 +60,6 @@ public class CounterViewModel extends ViewModel {
         stopEnabled.postValue(false);
         timerDisposable.dispose();
     }
-
-    private void onTimerUpdate(long totalSeconds) {
-        time = totalSeconds;
-        timeText.setValue(StringUtil.getTimeText(totalSeconds));
-    }
-
     public MutableLiveData<String> getTimeText() {
         return timeText;
     }
@@ -101,14 +92,9 @@ public class CounterViewModel extends ViewModel {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAddPositionToRoute(AddPositionToRouteEvent event) {
-        route.add(event.getPosition());
-        if (route.size() >= 2) {
-            LatLng firstPosition = route.get(route.size() - 2);
-            LatLng lastPosition = event.getPosition();
-            double computedDistance = SphericalUtil.computeDistanceBetween(firstPosition, lastPosition);
-            distance += computedDistance;
-            distanceText.postValue(StringUtil.getDistanceText(distance));
-        }
+        double computedDistance = SphericalUtil.computeDistanceBetween(event.getLastPosition(), event.getNewPosition());
+        distance += computedDistance;
+        distanceText.postValue(StringUtil.getDistanceText(distance));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

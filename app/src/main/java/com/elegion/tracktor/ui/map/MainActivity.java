@@ -18,6 +18,7 @@ import com.elegion.tracktor.event.SetStartPositionToRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.ui.results.ResultsActivity;
+import com.elegion.tracktor.util.StringUtil;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -32,6 +33,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.SphericalUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -48,36 +50,8 @@ public class MainActivity extends AppCompatActivity
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback {
 
-    public static final int LOCATION_REQUEST_CODE = 99;
-    public static final int UPDATE_INTERVAL = 5000;
-    public static final int UPDATE_FASTEST_INTERVAL = 2000;
-    public static final int UPDATE_MIN_DISTANCE = 20;
-    public static final int DEFAULT_ZOOM = 15;
-
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
-    private boolean isRouteStarted;
-    private FusedLocationProviderClient mFusedLocationClient;
-    private Location mLastLocation;
-    private LocationRequest mLocationRequest = new LocationRequest();
-    private LocationCallback mLocationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            if (locationResult != null && mMap != null) {
-                Location newLocation = locationResult.getLastLocation();
-                LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
-                if (isRouteStarted && mLastLocation != null) {
-                    EventBus.getDefault().post(new AddPositionToRouteEvent(newPosition));
-                    LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    mMap.addPolyline(new PolylineOptions().add(lastPosition, newPosition));
-                } else if (!isRouteStarted) {
-                    EventBus.getDefault().post(new SetStartPositionToRouteEvent(newPosition));
-                }
-                mLastLocation = newLocation;
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newPosition, DEFAULT_ZOOM));
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +87,11 @@ public class MainActivity extends AppCompatActivity
     protected void onPause() {
         EventBus.getDefault().unregister(this);
         super.onPause();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAddPositionToRoute(AddPositionToRouteEvent event) {
+        mMap.addPolyline(new PolylineOptions().add(lastPosition, newPosition));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
