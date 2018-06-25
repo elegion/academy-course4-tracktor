@@ -47,6 +47,8 @@ public class CounterViewModel extends ViewModel {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateRoute(UpdateRouteEvent event) {
         distanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
+        startEnabled.postValue(false);
+        stopEnabled.postValue(true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

@@ -53,14 +53,18 @@ public class CounterService extends IntentService {
     public static final int UPDATE_FASTEST_INTERVAL = 2000;
     public static final int UPDATE_MIN_DISTANCE = 20;
 
+    public CounterService() {
+        super("CounterService");
+    }
+
     public CounterService(String name) {
         super(name);
     }
 
-    private List<LatLng> mRoute = new ArrayList<>();
     private long mTime;
     private double mDistance;
     private Disposable mTimerDisposable;
+    private List<LatLng> mRoute = new ArrayList<>();
 
     private boolean isRouteStarted;
     private Location mLastLocation;
@@ -81,6 +85,7 @@ public class CounterService extends IntentService {
                     mDistance += SphericalUtil.computeDistanceBetween(lastPosition, newPosition);
                     //if (isAppRunning()) {
                     EventBus.getDefault().post(new AddPositionToRouteEvent(lastPosition, newPosition, mDistance));
+                    setNotification(StringUtil.getTimeText(mTime), StringUtil.getDistanceText(mDistance));
                     //}
                 }
 
@@ -96,29 +101,7 @@ public class CounterService extends IntentService {
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        notificationIntent.setAction(Intent.ACTION_MAIN);
-        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
-        PendingIntent contentIntent = PendingIntent.getActivity(
-                this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentIntent(contentIntent)
-                .setOngoing(true)
-                .setSmallIcon(R.drawable.ic_my_location_white_24dp)
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle("Маршрут активен!")
-                .setContentText("Мы следим за вами!\nВремя: "
-                        + StringUtil.getTimeText(mTime)
-                        + "\nРасстояние: "
-                        + StringUtil.getDistanceText(mDistance))
-                .setVibrate(new long[]{0})
-                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
-
-        Notification notification = builder.build();
-
-        startForeground(NOTIFICATION_ID, notification);
+        setNotification("", "");
         return START_STICKY;
     }
 
@@ -150,6 +133,39 @@ public class CounterService extends IntentService {
         super.onDestroy();
     }
 
+    private void setNotification(String time, String distance) {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String message = time.isEmpty() ? "Мы не следим за вами!" : "Мы следим за вами!\nВремя: " + time + "\nРасстояние: " + distance;
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentIntent(contentIntent)
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.ic_my_location_white_24dp)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Маршрут активен!")
+                .setContentText("Мы следим за вами!")
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .setVibrate(new long[]{0})
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
+
+        Notification notification = builder.build();
+
+        startForeground(NOTIFICATION_ID, notification);
+    }
+
+    private void onTimerUpdate(long totalSeconds) {
+        mTime = totalSeconds;
+
+        EventBus.getDefault().post(new UpdateTimerEvent(totalSeconds));
+        setNotification(StringUtil.getTimeText(mTime), StringUtil.getDistanceText(mDistance));
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onGetRoute(GetRouteEvent event) {
         if (mRoute.size() >= 2) {
@@ -165,12 +181,6 @@ public class CounterService extends IntentService {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTimerUpdate);
-    }
-
-    private void onTimerUpdate(long totalSeconds) {
-        mTime = totalSeconds;
-
-        EventBus.getDefault().post(new UpdateTimerEvent(totalSeconds));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

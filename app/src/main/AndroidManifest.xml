@@ -28,8 +28,7 @@
 
         <service
             android:name=".service.CounterService"
-            android:enabled="true"
-            android:process=":counterProcess">
+            android:enabled="true">
         </service>
     </application>
 
