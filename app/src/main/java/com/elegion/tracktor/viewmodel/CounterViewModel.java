@@ -3,8 +3,9 @@ package com.elegion.tracktor.viewmodel;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
-import com.elegion.tracktor.event.ClickStartRouteEvent;
-import com.elegion.tracktor.event.ClickStopRouteEvent;
+import com.elegion.tracktor.event.AddPositionToRouteEvent;
+import com.elegion.tracktor.event.StartRouteClickEvent;
+import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
 import com.elegion.tracktor.util.StringUtil;
@@ -25,7 +26,7 @@ public class CounterViewModel extends ViewModel {
     }
 
     public void startTimer() {
-        EventBus.getDefault().post(new ClickStartRouteEvent());
+        EventBus.getDefault().post(new StartRouteClickEvent());
         timeText.postValue("");
         distanceText.postValue("");
         startEnabled.postValue(false);
@@ -33,18 +34,23 @@ public class CounterViewModel extends ViewModel {
     }
 
     public void stopTimer() {
+        EventBus.getDefault().post(new StopRouteClickEvent());
         startEnabled.postValue(true);
         stopEnabled.postValue(false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateTimer(UpdateTimerEvent event) {
-        EventBus.getDefault().post(new ClickStopRouteEvent());
         timeText.postValue(StringUtil.getTimeText(event.getSeconds()));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateRoute(UpdateRouteEvent event) {
+        distanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAddPositionToRoute(AddPositionToRouteEvent event) {
         distanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
     }
 

@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
+import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
@@ -98,16 +99,16 @@ public class MainActivity extends AppCompatActivity
         addMarker(event.getStartPosition(), getString(R.string.start));
     }
 
-    private void addMarker(LatLng position, String text) {
-        mMap.addMarker(new MarkerOptions().position(position).title(text));
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStopRoute(StopRouteEvent event) {
         List<LatLng> route = event.getRoute();
-        mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
+        addMarker(route.get(route.size() - 1), getString(R.string.end));
 
         takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+    }
+
+    private void addMarker(LatLng position, String text) {
+        mMap.addMarker(new MarkerOptions().position(position).title(text));
     }
 
     private void takeMapScreenshot(List<LatLng> route, GoogleMap.SnapshotReadyCallback snapshotCallback) {
@@ -148,6 +149,7 @@ public class MainActivity extends AppCompatActivity
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
+            EventBus.getDefault().post(new GetRouteEvent());
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")

@@ -1,4 +1,4 @@
 package com.elegion.tracktor.event;
 
-public class ClickStartRouteEvent {
+public class StartRouteClickEvent {
 }

@@ -9,8 +9,8 @@ import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.ClickStartRouteEvent;
-import com.elegion.tracktor.event.ClickStopRouteEvent;
+import com.elegion.tracktor.event.StartRouteClickEvent;
+import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
@@ -72,7 +72,7 @@ public class CounterService extends IntentService {
                     mRoute.add(newPosition);
                     mDistance += SphericalUtil.computeDistanceBetween(lastPosition, newPosition);
                     //if (isAppRunning()) {
-                    EventBus.getDefault().post(new AddPositionToRouteEvent(lastPosition, newPosition));
+                    EventBus.getDefault().post(new AddPositionToRouteEvent(lastPosition, newPosition, mDistance));
                     //}
                 }
 
@@ -122,13 +122,13 @@ public class CounterService extends IntentService {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onGetRoute(GetRouteEvent event) {
-        if (mRoute.size() > 2) {
+        if (mRoute.size() >= 2) {
             EventBus.getDefault().post(new UpdateRouteEvent(mRoute, mDistance));
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onClickStartRoute(ClickStartRouteEvent event) {
+    public void onStartRouteClick(StartRouteClickEvent event) {
         isRouteStarted = true;
         EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
         mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
@@ -144,7 +144,7 @@ public class CounterService extends IntentService {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onClickStopRoute(ClickStopRouteEvent event) {
+    public void onStopRouteClick(StopRouteClickEvent event) {
         EventBus.getDefault().post(new StopRouteEvent(mDistance, mTime, new ArrayList<>(mRoute)));
         isRouteStarted = false;
         mRoute.clear();
