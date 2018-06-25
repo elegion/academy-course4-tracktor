@@ -2,15 +2,15 @@ package com.elegion.tracktor.event;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class StopRouteEvent {
 
     private double mDistance;
     private long mTime;
-    private ArrayList<LatLng> mRoute;
+    private List<LatLng> mRoute;
 
-    public StopRouteEvent(double distance, long time, ArrayList<LatLng> route) {
+    public StopRouteEvent(double distance, long time, List<LatLng> route) {
         mDistance = distance;
         mTime = time;
         mRoute = route;
@@ -24,7 +24,7 @@ public class StopRouteEvent {
         return mTime;
     }
 
-    public ArrayList<LatLng> getRoute() {
+    public List<LatLng> getRoute() {
         return mRoute;
     }
 }

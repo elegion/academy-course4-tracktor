@@ -14,16 +14,10 @@ import android.widget.Toast;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.SetStartPositionToRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
+import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.ui.results.ResultsActivity;
-import com.elegion.tracktor.util.StringUtil;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,7 +27,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.SphericalUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -50,6 +43,8 @@ public class MainActivity extends AppCompatActivity
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback {
 
+    public static final int LOCATION_REQUEST_CODE = 99;
+
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
 
@@ -58,12 +53,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(UPDATE_FASTEST_INTERVAL);
-        mLocationRequest.setSmallestDisplacement(UPDATE_MIN_DISTANCE);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (savedInstanceState == null) {
             mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -91,21 +80,30 @@ public class MainActivity extends AppCompatActivity
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAddPositionToRoute(AddPositionToRouteEvent event) {
-        mMap.addPolyline(new PolylineOptions().add(lastPosition, newPosition));
+        mMap.addPolyline(new PolylineOptions().add(event.getLastPosition(), event.getNewPosition()));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUpdateRoute(UpdateRouteEvent event) {
+        mMap.clear();
+
+        List<LatLng> route = event.getRoute();
+        mMap.addPolyline(new PolylineOptions().addAll(route));
+        addMarker(route.get(0), getString(R.string.start));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStartRoute(StartRouteEvent event) {
         mMap.clear();
-        LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(lastPosition).title(getString(R.string.start)));
-        isRouteStarted = true;
+        addMarker(event.getStartPosition(), getString(R.string.start));
+    }
+
+    private void addMarker(LatLng position, String text) {
+        mMap.addMarker(new MarkerOptions().position(position).title(text));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStopRoute(StopRouteEvent event) {
-        isRouteStarted = false;
-
         List<LatLng> route = event.getRoute();
         mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
 
@@ -150,7 +148,6 @@ public class MainActivity extends AppCompatActivity
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
