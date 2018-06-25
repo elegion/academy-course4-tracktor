@@ -79,7 +79,10 @@ public class CounterService extends IntentService {
                 Location newLocation = locationResult.getLastLocation();
                 LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
 
-                if (isRouteStarted && mLastLocation != null) {
+                if (isRouteStarted
+                        && mLastLocation != null
+                        && (mLastLocation.getLongitude() != newPosition.longitude
+                        || mLastLocation.getLatitude() != newPosition.latitude)) {
                     LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     mRoute.add(newPosition);
                     mDistance += SphericalUtil.computeDistanceBetween(lastPosition, newPosition);

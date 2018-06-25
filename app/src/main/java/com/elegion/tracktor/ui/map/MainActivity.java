@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity
         OnMapReadyCallback {
 
     public static final int LOCATION_REQUEST_CODE = 99;
+    public static final int DEFAULT_ZOOM = 15;
 
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
@@ -85,6 +86,8 @@ public class MainActivity extends AppCompatActivity
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAddPositionToRoute(AddPositionToRouteEvent event) {
         mMap.addPolyline(new PolylineOptions().add(event.getLastPosition(), event.getNewPosition()));
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(event.getNewPosition(), DEFAULT_ZOOM));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -94,6 +97,7 @@ public class MainActivity extends AppCompatActivity
         List<LatLng> route = event.getRoute();
         mMap.addPolyline(new PolylineOptions().addAll(route));
         addMarker(route.get(0), getString(R.string.start));
+        zoomRoute(route);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -115,6 +119,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void takeMapScreenshot(List<LatLng> route, GoogleMap.SnapshotReadyCallback snapshotCallback) {
+        zoomRoute(route);
+        mMap.snapshot(snapshotCallback);
+    }
+
+    private void zoomRoute(List<LatLng> route) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (LatLng point : route) {
             builder.include(point);
@@ -122,8 +131,6 @@ public class MainActivity extends AppCompatActivity
         int padding = 100;
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
         mMap.moveCamera(cu);
-
-        mMap.snapshot(snapshotCallback);
     }
 
     @Override
