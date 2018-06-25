@@ -2,20 +2,26 @@ package com.elegion.tracktor.service;
 
 import android.Manifest;
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.location.Location;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
+import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.StartRouteClickEvent;
-import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
+import com.elegion.tracktor.event.StartRouteClickEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
+import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
+import com.elegion.tracktor.ui.map.MainActivity;
+import com.elegion.tracktor.util.StringUtil;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -41,6 +47,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class CounterService extends IntentService {
 
+    public static final String CHANNEL_ID = "CHANNEL_ROUTE_NOTIFICATIONS";
+    public static final int NOTIFICATION_ID = 101;
     public static final int UPDATE_INTERVAL = 5000;
     public static final int UPDATE_FASTEST_INTERVAL = 2000;
     public static final int UPDATE_MIN_DISTANCE = 20;
@@ -88,12 +96,34 @@ public class CounterService extends IntentService {
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        notificationIntent.setAction(Intent.ACTION_MAIN);
+        notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+        PendingIntent contentIntent = PendingIntent.getActivity(
+                this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentIntent(contentIntent)
+                .setOngoing(true)
+                .setSmallIcon(R.drawable.ic_my_location_white_24dp)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle("Маршрут активен!")
+                .setContentText("Мы следим за вами!\nВремя: "
+                        + StringUtil.getTimeText(mTime)
+                        + "\nРасстояние: "
+                        + StringUtil.getDistanceText(mDistance))
+                .setVibrate(new long[]{0})
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
+
+        Notification notification = builder.build();
+
+        startForeground(NOTIFICATION_ID, notification);
+        return START_STICKY;
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-
     }
 
     @Override

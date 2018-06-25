@@ -25,6 +25,12 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.results.ResultsActivity" />
+
+        <service
+            android:name=".service.CounterService"
+            android:enabled="true"
+            android:process=":counterProcess">
+        </service>
     </application>
 
 </manifest>
