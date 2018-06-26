@@ -93,10 +93,9 @@ public class CounterService extends IntentService {
                     LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                     mRoute.add(newPosition);
                     mDistance += SphericalUtil.computeDistanceBetween(lastPosition, newPosition);
-                    //if (isAppRunning()) {
+
                     EventBus.getDefault().post(new AddPositionToRouteEvent(lastPosition, newPosition, mDistance));
                     setNotification(StringUtil.getTimeText(mTime), StringUtil.getDistanceText(mDistance));
-                    //}
                 }
 
                 mLastLocation = newLocation;
@@ -104,10 +103,6 @@ public class CounterService extends IntentService {
             }
         }
     };
-
-    private boolean isAppRunning() {
-        return true;
-    }
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
@@ -191,7 +186,7 @@ public class CounterService extends IntentService {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onGetRoute(GetRouteEvent event) {
-        if (mRoute.size() >= 2) {
+        if (mRoute.size() >= 1) {
             EventBus.getDefault().post(new UpdateRouteEvent(mRoute, mDistance));
         }
     }
@@ -199,6 +194,9 @@ public class CounterService extends IntentService {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStartRouteClick(StartRouteClickEvent event) {
         isRouteStarted = true;
+        if (mLastPosition != null) {
+            mRoute.add(mLastPosition);
+        }
         EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
         mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
                 .subscribeOn(Schedulers.io())
