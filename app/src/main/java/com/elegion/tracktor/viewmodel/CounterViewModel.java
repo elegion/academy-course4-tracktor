@@ -4,7 +4,6 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.StartRouteClickEvent;
 import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
@@ -26,7 +25,7 @@ public class CounterViewModel extends ViewModel {
     }
 
     public void startTimer() {
-        EventBus.getDefault().post(new StartRouteClickEvent());
+        //EventBus.getDefault().post(new StartRouteClickEvent());
         timeText.postValue("");
         distanceText.postValue("");
         startEnabled.postValue(false);

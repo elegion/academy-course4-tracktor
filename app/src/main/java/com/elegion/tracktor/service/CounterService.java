@@ -20,7 +20,6 @@ import android.widget.Toast;
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
-import com.elegion.tracktor.event.StartRouteClickEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
@@ -134,6 +133,8 @@ public class CounterService extends IntentService {
         } else {
             Toast.makeText(this, "Вы не дали разрешения!", Toast.LENGTH_SHORT).show();
         }
+
+        onStartRouteClick();
     }
 
     @Override
@@ -173,8 +174,8 @@ public class CounterService extends IntentService {
         NotificationChannel chan = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
         chan.setLightColor(Color.BLUE);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        service.createNotificationChannel(chan);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(chan);
     }
 
     private void onTimerUpdate(long totalSeconds) {
@@ -186,13 +187,11 @@ public class CounterService extends IntentService {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onGetRoute(GetRouteEvent event) {
-        if (mRoute.size() >= 1) {
-            EventBus.getDefault().post(new UpdateRouteEvent(mRoute, mDistance));
-        }
+        EventBus.getDefault().post(new UpdateRouteEvent(mRoute, mDistance));
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStartRouteClick(StartRouteClickEvent event) {
+    //@Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStartRouteClick(/*StartRouteClickEvent event*/) {
         isRouteStarted = true;
         if (mLastPosition != null) {
             mRoute.add(mLastPosition);
@@ -212,5 +211,6 @@ public class CounterService extends IntentService {
         mRoute.clear();
         mDistance = 0;
         mTimerDisposable.dispose();
+        stopSelf();
     }
 }
