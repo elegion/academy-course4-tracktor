@@ -1,6 +1,7 @@
 package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +19,7 @@ import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
+import com.elegion.tracktor.service.CounterService;
 import com.elegion.tracktor.ui.results.ResultsActivity;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -106,9 +108,14 @@ public class MainActivity extends AppCompatActivity
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStopRoute(StopRouteEvent event) {
         List<LatLng> route = event.getRoute();
+        if (route.isEmpty()) {
+            Toast.makeText(this, "Не стойте на месте!", Toast.LENGTH_SHORT).show();
+        }
         addMarker(route.get(route.size() - 1), getString(R.string.end));
 
         takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+
+        stopService(new Intent(this, CounterService.class));
     }
 
     private void addMarker(LatLng position, String text) {

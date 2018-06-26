@@ -1,6 +1,7 @@
 package com.elegion.tracktor.service;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -33,6 +34,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.SphericalUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -90,6 +92,9 @@ public class CounterService extends IntentService {
                         && (mLastLocation.getLongitude() != newPosition.longitude
                         || mLastLocation.getLatitude() != newPosition.latitude)) {
                     LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    if (mRoute.isEmpty() && mLastPosition != null) {
+                        mRoute.add(mLastPosition);
+                    }
                     mRoute.add(newPosition);
                     mDistance += SphericalUtil.computeDistanceBetween(lastPosition, newPosition);
 
@@ -191,16 +196,25 @@ public class CounterService extends IntentService {
     }
 
     //@Subscribe(threadMode = ThreadMode.MAIN)
+    @SuppressLint("MissingPermission")
     public void onStartRouteClick(/*StartRouteClickEvent event*/) {
         isRouteStarted = true;
-        if (mLastPosition != null) {
-            mRoute.add(mLastPosition);
-        }
-        EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
-        mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::onTimerUpdate);
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                Location lastLocation = location;
+                if (lastLocation != null) {
+                    mLastLocation = lastLocation;
+                    mLastPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                    mRoute.add(mLastPosition);
+                }
+                EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
+                mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(CounterService.this::onTimerUpdate);
+            }
+        });
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -211,6 +225,5 @@ public class CounterService extends IntentService {
         mRoute.clear();
         mDistance = 0;
         mTimerDisposable.dispose();
-        stopSelf();
     }
 }
