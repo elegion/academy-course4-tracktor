@@ -26,7 +26,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -126,11 +125,7 @@ public class MainActivity extends AppCompatActivity
 
     private void zoomRoute(List<LatLng> route) {
         if (route.size() == 1) {
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(
-                    new CameraPosition.Builder()
-                            .target(route.get(0))
-                            .zoom(DEFAULT_ZOOM)
-                            .build()));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(0), DEFAULT_ZOOM));
         } else {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (LatLng point : route) {
