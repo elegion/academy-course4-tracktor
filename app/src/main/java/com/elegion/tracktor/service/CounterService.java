@@ -3,10 +3,16 @@ package com.elegion.tracktor.service;
 import android.Manifest;
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
@@ -47,7 +53,8 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class CounterService extends IntentService {
 
-    public static final String CHANNEL_ID = "CHANNEL_ROUTE_NOTIFICATIONS";
+    public static final String CHANNEL_ID = "counter_service";
+    public static final String CHANNEL_NAME = "Counter Service";
     public static final int NOTIFICATION_ID = 101;
     public static final int UPDATE_INTERVAL = 5000;
     public static final int UPDATE_FASTEST_INTERVAL = 2000;
@@ -117,6 +124,10 @@ public class CounterService extends IntentService {
         super.onCreate();
         EventBus.getDefault().register(this);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel();
+        }
+
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationRequest.setInterval(UPDATE_INTERVAL);
         mLocationRequest.setFastestInterval(UPDATE_FASTEST_INTERVAL);
@@ -162,6 +173,15 @@ public class CounterService extends IntentService {
         startForeground(NOTIFICATION_ID, notification);
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void createNotificationChannel() {
+        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        NotificationManager service = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        service.createNotificationChannel(chan);
+    }
+
     private void onTimerUpdate(long totalSeconds) {
         mTime = totalSeconds;
 
@@ -189,6 +209,7 @@ public class CounterService extends IntentService {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStopRouteClick(StopRouteClickEvent event) {
         EventBus.getDefault().post(new StopRouteEvent(mDistance, mTime, new ArrayList<>(mRoute)));
+        setNotification("", "");
         isRouteStarted = false;
         mRoute.clear();
         mDistance = 0;
