@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     public static final int LOCATION_REQUEST_CODE = 99;
     public static final int DEFAULT_ZOOM = 15;
 
+    private boolean isStopFromNotification;
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
 
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        isStopFromNotification = getIntent().getAction() != null && getIntent().getAction().equals(CounterService.ACTION_STOP);
         if (savedInstanceState == null) {
             mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mMapFragment.setRetainInstance(true);
@@ -99,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         addMarker(route.get(0), getString(R.string.start));
         zoomRoute(route);
 
-        if (getIntent().getAction() != null && getIntent().getAction().equals(CounterService.ACTION_STOP)) {
+        if (isStopFromNotification) {
             EventBus.getDefault().post(new StopRouteClickEvent());
         }
     }
