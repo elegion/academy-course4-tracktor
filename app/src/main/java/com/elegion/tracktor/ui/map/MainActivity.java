@@ -110,10 +110,11 @@ public class MainActivity extends AppCompatActivity
         List<LatLng> route = event.getRoute();
         if (route.isEmpty()) {
             Toast.makeText(this, "Не стойте на месте!", Toast.LENGTH_SHORT).show();
-        }
-        addMarker(route.get(route.size() - 1), getString(R.string.end));
+        } else {
+            addMarker(route.get(route.size() - 1), getString(R.string.end));
 
-        takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+            takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+        }
 
         stopService(new Intent(this, CounterService.class));
     }
