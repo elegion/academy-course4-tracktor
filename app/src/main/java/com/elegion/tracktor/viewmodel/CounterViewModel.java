@@ -39,9 +39,9 @@ public class CounterViewModel extends ViewModel {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStopRouteClickTimer(StopRouteClickEvent event) {
-        startEnabled.postValue(false);
-        stopEnabled.postValue(true);
+    public void onStopRouteClick(StopRouteClickEvent event) {
+        startEnabled.postValue(true);
+        stopEnabled.postValue(false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
