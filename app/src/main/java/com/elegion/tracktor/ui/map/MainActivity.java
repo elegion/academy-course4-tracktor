@@ -1,6 +1,7 @@
 package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,15 +15,12 @@ import android.widget.Toast;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.SetStartPositionToRouteEvent;
+import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
+import com.elegion.tracktor.event.UpdateRouteEvent;
+import com.elegion.tracktor.service.CounterService;
 import com.elegion.tracktor.ui.results.ResultsActivity;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -49,47 +47,16 @@ public class MainActivity extends AppCompatActivity
         OnMapReadyCallback {
 
     public static final int LOCATION_REQUEST_CODE = 99;
-    public static final int UPDATE_INTERVAL = 5000;
-    public static final int UPDATE_FASTEST_INTERVAL = 2000;
-    public static final int UPDATE_MIN_DISTANCE = 20;
     public static final int DEFAULT_ZOOM = 15;
 
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
-    private boolean isRouteStarted;
-    private FusedLocationProviderClient mFusedLocationClient;
-    private Location mLastLocation;
-    private LocationRequest mLocationRequest = new LocationRequest();
-    private LocationCallback mLocationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            if (locationResult != null && mMap != null) {
-                Location newLocation = locationResult.getLastLocation();
-                LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
-                if (isRouteStarted && mLastLocation != null) {
-                    EventBus.getDefault().post(new AddPositionToRouteEvent(newPosition));
-                    LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    mMap.addPolyline(new PolylineOptions().add(lastPosition, newPosition));
-                } else if (!isRouteStarted) {
-                    EventBus.getDefault().post(new SetStartPositionToRouteEvent(newPosition));
-                }
-                mLastLocation = newLocation;
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(newPosition, DEFAULT_ZOOM));
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(UPDATE_FASTEST_INTERVAL);
-        mLocationRequest.setSmallestDisplacement(UPDATE_MIN_DISTANCE);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (savedInstanceState == null) {
             mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -116,33 +83,63 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onAddPositionToRoute(AddPositionToRouteEvent event) {
+        mMap.addPolyline(new PolylineOptions().add(event.getLastPosition(), event.getNewPosition()));
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(event.getNewPosition(), DEFAULT_ZOOM));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onUpdateRoute(UpdateRouteEvent event) {
+        mMap.clear();
+
+        List<LatLng> route = event.getRoute();
+        mMap.addPolyline(new PolylineOptions().addAll(route));
+        addMarker(route.get(0), getString(R.string.start));
+        zoomRoute(route);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStartRoute(StartRouteEvent event) {
         mMap.clear();
-        LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(lastPosition).title(getString(R.string.start)));
-        isRouteStarted = true;
+        addMarker(event.getStartPosition(), getString(R.string.start));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStopRoute(StopRouteEvent event) {
-        isRouteStarted = false;
-
         List<LatLng> route = event.getRoute();
-        mMap.addMarker(new MarkerOptions().position(route.get(route.size() - 1)).title(getString(R.string.end)));
+        if (route.isEmpty()) {
+            Toast.makeText(this, "Не стойте на месте!", Toast.LENGTH_SHORT).show();
+        } else {
+            addMarker(route.get(route.size() - 1), getString(R.string.end));
 
-        takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+            takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
+        }
+
+        stopService(new Intent(this, CounterService.class));
+    }
+
+    private void addMarker(LatLng position, String text) {
+        mMap.addMarker(new MarkerOptions().position(position).title(text));
     }
 
     private void takeMapScreenshot(List<LatLng> route, GoogleMap.SnapshotReadyCallback snapshotCallback) {
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng point : route) {
-            builder.include(point);
-        }
-        int padding = 100;
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
-        mMap.moveCamera(cu);
-
+        zoomRoute(route);
         mMap.snapshot(snapshotCallback);
+    }
+
+    private void zoomRoute(List<LatLng> route) {
+        if (route.size() == 1) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(0), DEFAULT_ZOOM));
+        } else {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (LatLng point : route) {
+                builder.include(point);
+            }
+            int padding = 100;
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
+            mMap.moveCamera(cu);
+        }
     }
 
     @Override
@@ -171,7 +168,7 @@ public class MainActivity extends AppCompatActivity
             mMap.setMyLocationEnabled(true);
             mMap.setOnMyLocationButtonClickListener(this);
             mMap.setOnMyLocationClickListener(this);
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+            EventBus.getDefault().post(new GetRouteEvent());
         } else {
             new AlertDialog.Builder(this)
                     .setTitle("Запрос разрешений на получение местоположения")
