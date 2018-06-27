@@ -11,8 +11,7 @@ import com.elegion.tracktor.util.ScreenshotMaker;
 
 
 /**
- * @author Azret Magometov
- */
+` */
 public class ResultsActivity extends SingleFragmentActivity {
     public static final String DISTANCE_KEY = "DISTANCE_KEY";
     public static final String TIME_KEY = "TIME_KEY";

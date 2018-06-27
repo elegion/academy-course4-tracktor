@@ -2,9 +2,10 @@ package com.elegion.tracktor.event;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class StopRouteEvent {
+public class StopRouteEvent implements Serializable {
 
     private double mDistance;
     private long mTime;
