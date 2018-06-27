@@ -56,6 +56,7 @@ public class CounterService extends IntentService {
 
     public static final String CHANNEL_ID = "counter_service";
     public static final String CHANNEL_NAME = "Counter Service";
+    public static final String ACTION_STOP = "ACTION_STOP";
     public static final int NOTIFICATION_ID = 101;
     public static final int UPDATE_INTERVAL = 5000;
     public static final int UPDATE_FASTEST_INTERVAL = 2000;
@@ -110,7 +111,6 @@ public class CounterService extends IntentService {
 
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        setNotification("", "");
         return START_STICKY;
     }
 
@@ -149,14 +149,18 @@ public class CounterService extends IntentService {
     }
 
     private void setNotification(String time, String distance) {
+        String message = time.isEmpty() ? "Мы не следим за вами!" : "Мы следим за вами!\nВремя: " + time + "\nРасстояние: " + distance;
+
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction(Intent.ACTION_MAIN);
         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
         PendingIntent contentIntent = PendingIntent.getActivity(
                 this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String message = time.isEmpty() ? "Мы не следим за вами!" : "Мы следим за вами!\nВремя: " + time + "\nРасстояние: " + distance;
+        Intent stopIntent = new Intent(this, MainActivity.class);
+        stopIntent.setAction(ACTION_STOP);
+        stopIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        PendingIntent stopPendingIntent = PendingIntent.getActivity(this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentIntent(contentIntent)
@@ -164,10 +168,11 @@ public class CounterService extends IntentService {
                 .setSmallIcon(R.drawable.ic_my_location_white_24dp)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle("Маршрут активен!")
-                .setContentText("Мы следим за вами!")
+                .setContentText(message)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setVibrate(new long[]{0})
-                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent))
+                .addAction(R.drawable.ic_stop_black_24dp, getString(R.string.stopRoute), stopPendingIntent);
 
         Notification notification = builder.build();
 

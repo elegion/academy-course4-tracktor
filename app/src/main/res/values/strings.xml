@@ -8,4 +8,5 @@
     <string name="statistic">Статистика</string>
     <string name="share">Поделиться</string>
     <string name="settings">Настройки</string>
+    <string name="stopRoute">Закончить маршрут</string>
 </resources>

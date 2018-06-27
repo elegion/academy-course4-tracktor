@@ -17,6 +17,7 @@ import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
+import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.service.CounterService;
@@ -97,6 +98,10 @@ public class MainActivity extends AppCompatActivity
         mMap.addPolyline(new PolylineOptions().addAll(route));
         addMarker(route.get(0), getString(R.string.start));
         zoomRoute(route);
+
+        if (getIntent().getAction() != null && getIntent().getAction().equals(CounterService.ACTION_STOP)) {
+            EventBus.getDefault().post(new StopRouteClickEvent());
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -197,7 +202,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        initMap();
+        mMap.setOnMapLoadedCallback(this::initMap);
     }
 
     @Override
