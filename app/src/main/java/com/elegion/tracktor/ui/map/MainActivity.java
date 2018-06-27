@@ -17,6 +17,7 @@ import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartRouteEvent;
+import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.StopRouteEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.service.CounterService;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     public static final int LOCATION_REQUEST_CODE = 99;
     public static final int DEFAULT_ZOOM = 15;
 
+    private boolean isStopFromNotification;
     private GoogleMap mMap;
     private SupportMapFragment mMapFragment;
 
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        isStopFromNotification = getIntent().getAction() != null && getIntent().getAction().equals(CounterService.ACTION_STOP);
         if (savedInstanceState == null) {
             mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mMapFragment.setRetainInstance(true);
@@ -97,6 +100,10 @@ public class MainActivity extends AppCompatActivity
         mMap.addPolyline(new PolylineOptions().addAll(route));
         addMarker(route.get(0), getString(R.string.start));
         zoomRoute(route);
+
+        if (isStopFromNotification) {
+            EventBus.getDefault().post(new StopRouteClickEvent());
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -197,7 +204,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        initMap();
+        mMap.setOnMapLoadedCallback(this::initMap);
     }
 
     @Override

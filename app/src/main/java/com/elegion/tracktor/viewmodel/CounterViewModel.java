@@ -39,6 +39,12 @@ public class CounterViewModel extends ViewModel {
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStopRouteClick(StopRouteClickEvent event) {
+        startEnabled.postValue(true);
+        stopEnabled.postValue(false);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateTimer(UpdateTimerEvent event) {
         timeText.postValue(StringUtil.getTimeText(event.getSeconds()));
     }
