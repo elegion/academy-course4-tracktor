@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity
     public void onStopRoute(StopRouteEvent event) {
         List<LatLng> route = event.getRoute();
         if (route.isEmpty()) {
-            Toast.makeText(this, "Не стойте на месте!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.dont_stay, Toast.LENGTH_SHORT).show();
         } else {
             addMarker(route.get(route.size() - 1), getString(R.string.end));
 
@@ -178,9 +178,9 @@ public class MainActivity extends AppCompatActivity
             EventBus.getDefault().post(new GetRouteEvent());
         } else {
             new AlertDialog.Builder(this)
-                    .setTitle("Запрос разрешений на получение местоположения")
-                    .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало")
-                    .setPositiveButton("ОК", (dialogInterface, i) ->
+                    .setTitle(R.string.permissions_request_title)
+                    .setMessage(R.string.permissions_request_message)
+                    .setPositiveButton(R.string.ok, (dialogInterface, i) ->
                             ActivityCompat.requestPermissions(MainActivity.this,
                                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE}, LOCATION_REQUEST_CODE))
                     .create()
@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity
                     grantResults[0] == PERMISSION_GRANTED) {
                 initMap();
             } else {
-                Toast.makeText(this, "Вы не дали разрешения!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show();
             }
         }
     }

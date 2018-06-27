@@ -34,7 +34,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.android.SphericalUtil;
 
 import org.greenrobot.eventbus.EventBus;
@@ -136,7 +135,7 @@ public class CounterService extends IntentService {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
             mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
         } else {
-            Toast.makeText(this, "Вы не дали разрешения!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show();
         }
 
         onStartRouteClick();
@@ -167,7 +166,7 @@ public class CounterService extends IntentService {
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_my_location_white_24dp)
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle("Маршрут активен!")
+                .setContentTitle(getString(R.string.route_active))
                 .setContentText(message)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setVibrate(new long[]{0})
@@ -200,25 +199,20 @@ public class CounterService extends IntentService {
         EventBus.getDefault().post(new UpdateRouteEvent(mRoute, mDistance));
     }
 
-    //@Subscribe(threadMode = ThreadMode.MAIN)
     @SuppressLint("MissingPermission")
-    public void onStartRouteClick(/*StartRouteClickEvent event*/) {
+    public void onStartRouteClick() {
         isRouteStarted = true;
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                Location lastLocation = location;
-                if (lastLocation != null) {
-                    mLastLocation = lastLocation;
-                    mLastPosition = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                    mRoute.add(mLastPosition);
-                }
-                EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
-                mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(CounterService.this::onTimerUpdate);
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                mLastLocation = location;
+                mLastPosition = new LatLng(location.getLatitude(), location.getLongitude());
+                mRoute.add(mLastPosition);
             }
+            EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
+            mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(CounterService.this::onTimerUpdate);
         });
     }
 
