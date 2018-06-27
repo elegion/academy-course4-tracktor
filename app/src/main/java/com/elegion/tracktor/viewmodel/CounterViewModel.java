@@ -25,7 +25,6 @@ public class CounterViewModel extends ViewModel {
     }
 
     public void startTimer() {
-        //EventBus.getDefault().post(new StartRouteClickEvent());
         timeText.postValue("");
         distanceText.postValue("");
         startEnabled.postValue(false);
