@@ -2,9 +2,11 @@ package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -104,9 +106,22 @@ public class MainActivity extends AppCompatActivity {
             case R.id.actionSettings:
                 PreferenceActivity.start(this);
                 return true;
+            case R.id.actionAbout:
+                launchAboutScreen();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void launchAboutScreen() {
+        CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                .setToolbarColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                .setShowTitle(true)
+                .enableUrlBarHiding()
+                .build();
+
+        intent.launchUrl(this, Uri.parse("https://www.e-legion.com"));
     }
 
     @Override

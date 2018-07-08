@@ -13,16 +13,8 @@
     <string name="permissions_denied">Вы не дали разрешения!</string>
     <string name="dont_stay">Не стойте на месте!</string>
 
-    <string name="menu_item_results">Статистика</string>
-    <string name="menu_item_preferences">Настройки</string>
     <string name="menu_item_about">О приложении</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
     <string name="title_activity_preference">Настройки</string>
-    <string name="preferences_category_common">Общие</string>
-
     <string name="title_distance_unit">Единица измерения</string>
     <string name="dialog_title_distance_unit">Выберите единицу измерения</string>
     <string name="title_auto_shutdown">Автоотключение</string>
@@ -37,6 +29,7 @@
     <string name="pref_default_value_shutdown">0</string>
     <string name="pref_default_value_weight">60</string>
     <string name="btn_delete_result">Удалить</string>
+
     <string name="permissions_request_title">Внимание!</string>
     <string name="permissions_request_message">Для корректной работы приложения необходим доступ к местоположению. Для сохранения скриншотов необходим доступ к внешнему хранилищу</string>
     <string name="ok">Понятно</string>

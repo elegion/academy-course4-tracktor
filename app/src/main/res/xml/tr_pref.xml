@@ -27,10 +27,4 @@
         android:lines="1"
         android:title="@string/dialog_title_user_weight" />
 
-    <Preference android:title="@string/title_about_app">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="https://www.e-legion.com/" />
-    </Preference>
-
 </PreferenceScreen>
