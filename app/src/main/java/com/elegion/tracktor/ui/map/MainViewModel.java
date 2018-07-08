@@ -3,6 +3,7 @@ package com.elegion.tracktor.ui.map;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
+import com.elegion.tracktor.data.RealmRepository;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
@@ -20,26 +21,32 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> mTimeText = new MutableLiveData<>();
     private MutableLiveData<String> mDistanceText = new MutableLiveData<>();
 
+    private long duration;
+    private double distanse;
+    private RealmRepository mRealmRepository;
+
     public MainViewModel() {
         EventBus.getDefault().register(this);
         startEnabled.setValue(true);
         stopEnabled.setValue(false);
+        mRealmRepository = new RealmRepository();
     }
 
     public void switchButtons() {
         startEnabled.setValue(!startEnabled.getValue());
         stopEnabled.setValue(!stopEnabled.getValue());
-
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateTimer(UpdateTimerEvent event) {
         mTimeText.postValue(StringUtil.getTimeText(event.getSeconds()));
+        duration = event.getSeconds();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateRoute(UpdateRouteEvent event) {
         mDistanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
+        distanse = event.getDistance();
 
         startEnabled.postValue(false);
         stopEnabled.postValue(true);
@@ -75,5 +82,10 @@ public class MainViewModel extends ViewModel {
     public void clear() {
         mTimeText.setValue("");
         mDistanceText.setValue("");
+    }
+
+    public long saveResults(String base54image) {
+
+        return mRealmRepository.createAndInsertTrackFrom(duration, distanse, base54image);
     }
 }

@@ -18,14 +18,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.elegion.tracktor.R;
+import com.elegion.tracktor.data.RealmRepository;
+import com.elegion.tracktor.data.model.Track;
 import com.elegion.tracktor.util.ScreenshotMaker;
+import com.elegion.tracktor.util.StringUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.elegion.tracktor.ui.results.ResultsActivity.DISTANCE_KEY;
-import static com.elegion.tracktor.ui.results.ResultsActivity.SCREENSHOT_KEY;
-import static com.elegion.tracktor.ui.results.ResultsActivity.TIME_KEY;
+import static com.elegion.tracktor.ui.results.ResultsActivity.RESULT_ID;
 
 /**
  * @author Azret Magometov
@@ -42,9 +43,6 @@ public class ResultsDetailsFragment extends Fragment {
     private Bitmap mImage;
 
     public static ResultsDetailsFragment newInstance(Bundle bundle) {
-//        Bundle args = new Bundle();
-//        args.putAll(bundle);
-
         ResultsDetailsFragment fragment = new ResultsDetailsFragment();
         fragment.setArguments(bundle);
         return fragment;
@@ -62,13 +60,19 @@ public class ResultsDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
-        String distance = getArguments().getString(DISTANCE_KEY, null);
-        String time = getArguments().getString(TIME_KEY, null);
+        long resultId = getArguments().getLong(RESULT_ID, 0);
+
+        //temporary
+        RealmRepository realmRepository = new RealmRepository();
+        Track track = realmRepository.getItem(resultId);
+
+        String distance = StringUtil.getDistanceText(track.getDistance());
+        String time = StringUtil.getTimeText(track.getDuration());
 
         mTimeText.setText(time);
         mDistanceText.setText(distance);
 
-        mImage = ScreenshotMaker.fromBase64(getArguments().getString(SCREENSHOT_KEY));
+        mImage = ScreenshotMaker.fromBase64(track.getImageBase64());
         mScreenshotImage.setImageBitmap(mImage);
     }
 

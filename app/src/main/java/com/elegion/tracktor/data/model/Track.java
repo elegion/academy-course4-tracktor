@@ -1,9 +1,7 @@
 package com.elegion.tracktor.data.model;
 
 import java.util.Date;
-import java.util.List;
 
-import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -13,75 +11,64 @@ import io.realm.annotations.PrimaryKey;
 public class Track extends RealmObject {
 
     @PrimaryKey
-    private long mId;
+    private long id;
 
-    private Date mDate;
+    private Date date;
 
-    private long mDuration;
+    private long duration;
 
-    private Double mDistance;
+    private Double distance;
 
-    private String mImageBase64;
-
-    private RealmList<Location> mLocations;
+    private String imageBase64;
 
     public void setId(long id) {
-        mId = id;
+        this.id = id;
     }
 
     public long getId() {
-        return mId;
+        return id;
     }
 
     public Date getDate() {
-        return mDate;
+        return date;
     }
 
     public void setDate(Date date) {
-        mDate = date;
+        this.date = date;
     }
 
     public long getDuration() {
-        return mDuration;
+        return duration;
     }
 
     public void setDuration(long duration) {
-        mDuration = duration;
+        this.duration = duration;
     }
 
     public Double getDistance() {
-        return mDistance;
+        return distance;
     }
 
     public void setDistance(Double distance) {
-        mDistance = distance;
-    }
-
-    public List<Location> getLocations() {
-        return mLocations;
-    }
-
-    public void setLocations(RealmList<Location> locations) {
-        mLocations = locations;
+        this.distance = distance;
     }
 
     public void setImageBase64(String imageBase64) {
-        mImageBase64 = imageBase64;
+        this.imageBase64 = imageBase64;
     }
 
     public String getImageBase64() {
-        return mImageBase64;
+        return imageBase64;
     }
 
     @Override
     public String toString() {
         return "Track{" +
-                "mId=" + mId +
-                ", mDate=" + mDate +
-                ", mDuration=" + mDuration +
-                ", mDistance=" + mDistance +
-                ", mImageBase64=" + mImageBase64 +
-                ", mLocations=" + mLocations +
+                "id=" + id +
+                ", date=" + date +
+                ", duration=" + duration +
+                ", distance=" + distance +
+                ", imageBase64=" + imageBase64 +
                 '}';
     }
 }
