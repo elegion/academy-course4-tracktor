@@ -2,6 +2,7 @@ package com.elegion.tracktor.data;
 
 import com.elegion.tracktor.data.model.Track;
 
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -18,7 +19,7 @@ public class RealmRepository implements IRepository<Track> {
 
     public RealmRepository() {
         mRealm = Realm.getDefaultInstance();
-        Number max = mRealm.where(Track.class).max("mId");
+        Number max = mRealm.where(Track.class).max("id");
         sPrimaryId = max == null ? new AtomicLong(0) : new AtomicLong(max.longValue());
     }
 
@@ -29,7 +30,7 @@ public class RealmRepository implements IRepository<Track> {
     }
 
     private Track getRealmAssociatedTrack(long id) {
-        return mRealm.where(Track.class).equalTo("mId", id).findFirst();
+        return mRealm.where(Track.class).equalTo("id", id).findFirst();
     }
 
     @Override
@@ -71,5 +72,21 @@ public class RealmRepository implements IRepository<Track> {
         mRealm.beginTransaction();
         mRealm.copyToRealmOrUpdate(track);
         mRealm.commitTransaction();
+    }
+
+    public long createAndInsertTrackFrom(long duration, double distanse, String base64image) {
+        Track track = new Track();
+
+//        mRealm.beginTransaction();
+//        Track track = mRealm.createObject(Track.class, sPrimaryId.incrementAndGet());
+        track.setDistance(distanse);
+        track.setDuration(duration);
+        track.setImageBase64(base64image);
+        track.setDate(new Date());
+//        mRealm.commitTransaction();
+//        return sPrimaryId.longValue();
+
+        return insertItem(track);
+
     }
 }

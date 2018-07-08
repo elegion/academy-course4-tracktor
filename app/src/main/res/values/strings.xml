@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">Tracktor</string>
+    <string name="timeLabel">Время:</string>
+    <string name="distanceLabel">Расстояние:</string>
+    <string name="start">Старт</string>
+    <string name="end">Конец</string>
+    <string name="stop">Стоп</string>
+    <string name="statistic">Статистика</string>
+    <string name="share">Поделиться</string>
+    <string name="settings">Настройки</string>
+    <string name="stopRoute">Закончить маршрут</string>
+    <string name="route_active">Маршрут активен!</string>
+    <string name="permissions_denied">Вы не дали разрешения!</string>
+    <string name="dont_stay">Не стойте на месте!</string>
 
     <string name="menu_item_results">Статистика</string>
     <string name="menu_item_preferences">Настройки</string>
@@ -24,4 +36,10 @@
     <string name="pref_default_value_unit">1</string>
     <string name="pref_default_value_shutdown">0</string>
     <string name="pref_default_value_weight">60</string>
+    <string name="btn_delete_result">Удалить</string>
+    <string name="permissions_request_title">Внимание!</string>
+    <string name="permissions_request_message">Для корректной работы приложения необходим доступ к местоположению. Для сохранения скриншотов необходим доступ к внешнему хранилищу</string>
+    <string name="ok">Понятно</string>
+    <string name="back_off">Приложение не может работать без доступа к местоположению</string>
+    <string name="notify_info">Время: %s\nРасстояние: %s "</string>
 </resources>

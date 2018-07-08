@@ -1,4 +1,4 @@
-package com.elegion.tracktor.preferences;
+package com.elegion.tracktor.ui.preferences;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

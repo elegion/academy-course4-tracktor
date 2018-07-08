@@ -1,11 +1,11 @@
-package com.elegion.tracktor.utils;
+package com.elegion.tracktor.util;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.elegion.tracktor.data.IRepository;
-import com.elegion.tracktor.results.list.ResultsViewModel;
+import com.elegion.tracktor.ui.results.ResultsViewModel;
 
 /**
  * @author Azret Magometov
