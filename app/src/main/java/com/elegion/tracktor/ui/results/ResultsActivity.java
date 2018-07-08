@@ -10,8 +10,9 @@ import com.elegion.tracktor.common.SingleFragmentActivity;
 /**
  * `
  */
-public class ResultsActivity extends SingleFragmentActivity {
+public class ResultsActivity extends SingleFragmentActivity implements ResultsFragment.OnItemClickListener {
     public static final String RESULT_ID = "RESULT_ID";
+    public static final long LIST_ID = -1L;
 
     public static void start(@NonNull Context context, long resultId) {
         Intent intent = new Intent(context, ResultsActivity.class);
@@ -22,6 +23,16 @@ public class ResultsActivity extends SingleFragmentActivity {
 
     @Override
     protected Fragment getFragment() {
-        return ResultsDetailsFragment.newInstance(getIntent().getExtras());
+        long resultId = getIntent().getLongExtra(RESULT_ID, LIST_ID);
+
+        if (resultId != LIST_ID)
+            return ResultsDetailsFragment.newInstance(resultId);
+        else
+            return ResultsFragment.newInstance();
+    }
+
+    @Override
+    public void onClick(long trackId) {
+        changeFragment(ResultsDetailsFragment.newInstance(trackId));
     }
 }

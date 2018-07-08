@@ -17,6 +17,7 @@ import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.StartBtnClickedEvent;
 import com.elegion.tracktor.event.StopBtnClickedEvent;
 import com.elegion.tracktor.service.CounterService;
+import com.elegion.tracktor.ui.results.ResultsActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -97,8 +98,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.actionStatistic:
-                //todo add logic
-                break;
+                ResultsActivity.start(this, ResultsActivity.LIST_ID);
+                return true;
             case R.id.actionSettings:
                 //todo add logic
                 break;

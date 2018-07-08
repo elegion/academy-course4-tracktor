@@ -1,4 +1,4 @@
-package com.elegion.tracktor.results.list;
+package com.elegion.tracktor.ui.results;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.data.model.Track;
-import com.elegion.tracktor.results.list.ResultsFragment.OnItemClickListener;
+import com.elegion.tracktor.ui.results.ResultsFragment.OnItemClickListener;
 
 import java.util.List;
 

@@ -42,7 +42,9 @@ public class ResultsDetailsFragment extends Fragment {
 
     private Bitmap mImage;
 
-    public static ResultsDetailsFragment newInstance(Bundle bundle) {
+    public static ResultsDetailsFragment newInstance(long trackId) {
+        Bundle bundle = new Bundle();
+        bundle.putLong(RESULT_ID, trackId);
         ResultsDetailsFragment fragment = new ResultsDetailsFragment();
         fragment.setArguments(bundle);
         return fragment;

@@ -1,4 +1,4 @@
-package com.elegion.tracktor.results.list;
+package com.elegion.tracktor.ui.results;
 
 import android.content.Context;
 import android.os.Bundle;
