@@ -13,8 +13,7 @@
     <string name="permissions_denied">Вы не дали разрешения!</string>
     <string name="dont_stay">Не стойте на месте!</string>
 
-    <string name="menu_item_results">Results</string>
-    <string name="btn_delete_result">Удалить запись</string>
+    <string name="btn_delete_result">Удалить</string>
     <string name="permissions_request_title">Внимание!</string>
     <string name="permissions_request_message">Для корректной работы приложения необходим доступ к местоположению. Для сохранения скриншотов необходим доступ к внешнему хранилищу</string>
     <string name="ok">Понятно</string>

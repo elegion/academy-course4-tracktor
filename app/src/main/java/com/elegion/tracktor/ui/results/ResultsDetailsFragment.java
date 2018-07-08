@@ -41,6 +41,8 @@ public class ResultsDetailsFragment extends Fragment {
     ImageView mScreenshotImage;
 
     private Bitmap mImage;
+    private RealmRepository mRealmRepository;
+    private long mTrackId;
 
     public static ResultsDetailsFragment newInstance(long trackId) {
         Bundle bundle = new Bundle();
@@ -62,11 +64,11 @@ public class ResultsDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
-        long resultId = getArguments().getLong(RESULT_ID, 0);
+        mTrackId = getArguments().getLong(RESULT_ID, 0);
 
         //temporary
-        RealmRepository realmRepository = new RealmRepository();
-        Track track = realmRepository.getItem(resultId);
+        mRealmRepository = new RealmRepository();
+        Track track = mRealmRepository.getItem(mTrackId);
 
         String distance = StringUtil.getDistanceText(track.getDistance());
         String time = StringUtil.getTimeText(track.getDuration());
@@ -95,7 +97,13 @@ public class ResultsDetailsFragment extends Fragment {
             intent.putExtra(Intent.EXTRA_STREAM, uri);
             intent.putExtra(Intent.EXTRA_TEXT, "Время: " + mTimeText.getText() + "\nРасстояние: " + mDistanceText.getText());
             startActivity(Intent.createChooser(intent, "Результаты маршрута"));
-        }
-        return super.onOptionsItemSelected(item);
+            return true;
+        } else if (item.getItemId() == R.id.actionDelete) {
+            if (mRealmRepository.deleteItem(mTrackId)) {
+                getActivity().onBackPressed();
+            }
+            return true;
+        } else
+            return super.onOptionsItemSelected(item);
     }
 }

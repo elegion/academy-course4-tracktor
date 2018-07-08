@@ -7,4 +7,10 @@
         android:title="@string/share"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/actionDelete"
+        android:title="@string/btn_delete_result"
+        app:showAsAction="never" />
+
+
 </menu>

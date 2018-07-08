@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.data.RealmRepository;
-import com.elegion.tracktor.utils.CustomViewModelFactory;
+import com.elegion.tracktor.util.CustomViewModelFactory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

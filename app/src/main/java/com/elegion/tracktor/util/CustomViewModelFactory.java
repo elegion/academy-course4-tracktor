@@ -1,4 +1,4 @@
-package com.elegion.tracktor.utils;
+package com.elegion.tracktor.util;
 
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
