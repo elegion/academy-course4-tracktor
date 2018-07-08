@@ -30,7 +30,7 @@
     <Preference android:title="@string/title_about_app">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="http://codepath.com/" />
+            android:data="https://www.e-legion.com/" />
     </Preference>
 
 </PreferenceScreen>

@@ -17,6 +17,7 @@ import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.StartBtnClickedEvent;
 import com.elegion.tracktor.event.StopBtnClickedEvent;
 import com.elegion.tracktor.service.CounterService;
+import com.elegion.tracktor.ui.preferences.PreferenceActivity;
 import com.elegion.tracktor.ui.results.ResultsActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -101,12 +102,11 @@ public class MainActivity extends AppCompatActivity {
                 ResultsActivity.start(this, ResultsActivity.LIST_ID);
                 return true;
             case R.id.actionSettings:
-                //todo add logic
-                break;
+                PreferenceActivity.start(this);
+                return true;
             default:
-                break;
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

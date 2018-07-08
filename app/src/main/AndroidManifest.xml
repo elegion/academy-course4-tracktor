@@ -27,16 +27,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity android:name=".ui.results.ResultsActivity" />
 
+        <activity
+            android:label="@string/title_activity_preference"
+            android:name=".ui.preferences.PreferenceActivity"/>
         <service
             android:name=".service.CounterService"
             android:enabled="true"
             android:exported="false" />
-        <activity android:name=".results.ResultsActivity" />
-        <activity
-            android:label="@string/title_activity_preference"
-            android:name=".preferences.PreferenceActivity"/>
     </application>
 
 </manifest>
