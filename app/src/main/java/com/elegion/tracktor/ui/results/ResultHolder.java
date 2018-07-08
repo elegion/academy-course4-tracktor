@@ -1,4 +1,4 @@
-package com.elegion.tracktor.results.list;
+package com.elegion.tracktor.ui.results;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
