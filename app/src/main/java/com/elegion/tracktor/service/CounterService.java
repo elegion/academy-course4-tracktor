@@ -8,10 +8,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
@@ -22,6 +24,7 @@ import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
 import com.elegion.tracktor.event.StartTrackEvent;
+import com.elegion.tracktor.event.StopBtnClickedEvent;
 import com.elegion.tracktor.event.StopTrackEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
@@ -68,6 +71,7 @@ public class CounterService extends Service {
     private LatLng mLastPosition;
 
     private NotificationCompat.Builder mNotificationBuilder;
+    private long mShutDownDuration;
 
     private FusedLocationProviderClient mFusedLocationClient;
     private NotificationManager mNotificationManager;
@@ -136,6 +140,9 @@ public class CounterService extends Service {
 
             startTimer();
 
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            mShutDownDuration = Long.valueOf(preferences.getString(getString(R.string.pref_key_shutdown), "-1"));
+
         } else {
             Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show();
         }
@@ -154,6 +161,12 @@ public class CounterService extends Service {
 
         Notification notification = buildNotification(StringUtil.getTimeText(totalSeconds), StringUtil.getDistanceText(mDistance));
         mNotificationManager.notify(NOTIFICATION_ID, notification);
+
+        if (mShutDownDuration != -1 && totalSeconds == mShutDownDuration) {
+            EventBus.getDefault().post(new StopBtnClickedEvent());
+            //configure btns state
+        }
+
     }
 
     @Override

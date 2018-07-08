@@ -33,6 +33,7 @@
         <activity
             android:label="@string/title_activity_preference"
             android:name=".ui.preferences.PreferenceActivity"/>
+
         <service
             android:name=".service.CounterService"
             android:enabled="true"
