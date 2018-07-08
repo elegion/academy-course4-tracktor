@@ -4,11 +4,11 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class StartRouteEvent {
+public class StartTrackEvent {
 
     private LatLng mStartPosition;
 
-    public StartRouteEvent(@NonNull LatLng startPosition) {
+    public StartTrackEvent(@NonNull LatLng startPosition) {
         mStartPosition = startPosition;
     }
 

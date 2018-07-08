@@ -17,7 +17,7 @@ public class ResultsActivity extends SingleFragmentActivity {
     public static final String TIME_KEY = "TIME_KEY";
     public static final String SCREENSHOT_KEY = "SCREENSHOT_KEY";
 
-    public static void start(@NonNull Context context, double distance, long time, Bitmap screenshot){
+    public static void start(@NonNull Context context, String  distance, String time, Bitmap screenshot){
         Intent intent = new Intent(context, ResultsActivity.class);
         intent.putExtra(DISTANCE_KEY, distance);
         intent.putExtra(TIME_KEY, time);

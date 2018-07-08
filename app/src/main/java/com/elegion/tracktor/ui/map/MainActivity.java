@@ -2,7 +2,7 @@ package com.elegion.tracktor.ui.map;
 
 import android.Manifest;
 import android.content.Intent;
-import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -14,138 +14,76 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.elegion.tracktor.R;
-import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.GetRouteEvent;
-import com.elegion.tracktor.event.StartRouteEvent;
-import com.elegion.tracktor.event.StopRouteClickEvent;
-import com.elegion.tracktor.event.StopRouteEvent;
-import com.elegion.tracktor.event.UpdateRouteEvent;
+import com.elegion.tracktor.event.StartBtnClickedEvent;
+import com.elegion.tracktor.event.StopBtnClickedEvent;
 import com.elegion.tracktor.service.CounterService;
-import com.elegion.tracktor.ui.results.ResultsActivity;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.List;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
-import butterknife.ButterKnife;
+public class MainActivity extends AppCompatActivity {
 
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
-public class MainActivity extends AppCompatActivity
-        implements GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,
-        OnMapReadyCallback {
-
-    public static final int LOCATION_REQUEST_CODE = 99;
-    public static final int DEFAULT_ZOOM = 15;
-
-    private boolean isStopFromNotification;
-    private GoogleMap mMap;
-    private SupportMapFragment mMapFragment;
+    private static final int REQUEST_LOCATION_STORAGE = 42;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
 
-        isStopFromNotification = getIntent().getAction() != null && getIntent().getAction().equals(CounterService.ACTION_STOP);
-        if (savedInstanceState == null) {
-            mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-            mMapFragment.setRetainInstance(true);
-            mMapFragment.getMapAsync(this);
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.counterContainer, new CounterFragment())
-                    .commit();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_DENIED) {
+            showRequestRationaleDialog();
+        } else {
+            configureMap();
         }
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStartBtnClicked(@NonNull StartBtnClickedEvent event) {
+        Intent serviceIntent = getServiceIntent();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStopBtnClicked(@NonNull StopBtnClickedEvent event) {
+        stopService(getServiceIntent());
+    }
+
+    private void showRequestRationaleDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.permissions_request_title)
+                .setMessage(R.string.permissions_request_message)
+                .setPositiveButton(R.string.ok, (dialogInterface, i) ->
+                        ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                REQUEST_LOCATION_STORAGE))
+                .create()
+                .show();
+    }
+
+    private void configureMap() {
+        TrackMapFragment map = getTrackMapFragment();
+        map.configure();
     }
 
     @Override
-    protected void onResume() {
-        EventBus.getDefault().register(this);
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        EventBus.getDefault().unregister(this);
-        super.onPause();
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onAddPositionToRoute(AddPositionToRouteEvent event) {
-        mMap.addPolyline(new PolylineOptions().add(event.getLastPosition(), event.getNewPosition()));
-
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(event.getNewPosition(), DEFAULT_ZOOM));
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onUpdateRoute(UpdateRouteEvent event) {
-        mMap.clear();
-
-        List<LatLng> route = event.getRoute();
-        mMap.addPolyline(new PolylineOptions().addAll(route));
-        addMarker(route.get(0), getString(R.string.start));
-        zoomRoute(route);
-
-        if (isStopFromNotification) {
-            EventBus.getDefault().post(new StopRouteClickEvent());
-        }
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStartRoute(StartRouteEvent event) {
-        mMap.clear();
-        addMarker(event.getStartPosition(), getString(R.string.start));
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStopRoute(StopRouteEvent event) {
-        List<LatLng> route = event.getRoute();
-        if (route.isEmpty()) {
-            Toast.makeText(this, "Не стойте на месте!", Toast.LENGTH_SHORT).show();
-        } else {
-            addMarker(route.get(route.size() - 1), getString(R.string.end));
-
-            takeMapScreenshot(route, bitmap -> ResultsActivity.start(this, event.getDistance(), event.getTime(), bitmap));
-        }
-
-        stopService(new Intent(this, CounterService.class));
-    }
-
-    private void addMarker(LatLng position, String text) {
-        mMap.addMarker(new MarkerOptions().position(position).title(text));
-    }
-
-    private void takeMapScreenshot(List<LatLng> route, GoogleMap.SnapshotReadyCallback snapshotCallback) {
-        zoomRoute(route);
-        mMap.snapshot(snapshotCallback);
-    }
-
-    private void zoomRoute(List<LatLng> route) {
-        if (route.size() == 1) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(route.get(0), DEFAULT_ZOOM));
-        } else {
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for (LatLng point : route) {
-                builder.include(point);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_LOCATION_STORAGE) {
+            if (permissions[0].equalsIgnoreCase(Manifest.permission.ACCESS_FINE_LOCATION) && grantResults[0] == PERMISSION_DENIED) {
+                Toast.makeText(this, R.string.back_off, Toast.LENGTH_LONG).show();
+                finish();
+            } else {
+                configureMap();
             }
-            int padding = 100;
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
-            mMap.moveCamera(cu);
         }
     }
 
@@ -170,49 +108,31 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void initMap() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
-            mMap.setMyLocationEnabled(true);
-            mMap.setOnMyLocationButtonClickListener(this);
-            mMap.setOnMyLocationClickListener(this);
-            EventBus.getDefault().post(new GetRouteEvent());
-        } else {
-            new AlertDialog.Builder(this)
-                    .setTitle("Запрос разрешений на получение местоположения")
-                    .setMessage("Нам необходимо знать Ваше местоположение, чтобы приложение работало")
-                    .setPositiveButton("ОК", (dialogInterface, i) ->
-                            ActivityCompat.requestPermissions(MainActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE}, LOCATION_REQUEST_CODE))
-                    .create()
-                    .show();
-        }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            if (permissions.length == 2 &&
-                    permissions[0].equalsIgnoreCase(Manifest.permission.ACCESS_FINE_LOCATION) &&
-                    grantResults[0] == PERMISSION_GRANTED) {
-                initMap();
-            } else {
-                Toast.makeText(this, "Вы не дали разрешения!", Toast.LENGTH_SHORT).show();
-            }
-        }
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setOnMapLoadedCallback(this::initMap);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Toast.makeText(this, "from notify", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onMyLocationClick(@NonNull Location location) {
+    @NonNull
+    private Intent getServiceIntent() {
+        return new Intent(this, CounterService.class);
     }
 
-    @Override
-    public boolean onMyLocationButtonClick() {
-        return false;
+    private TrackMapFragment getTrackMapFragment() {
+        return (TrackMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
     }
+
 }
