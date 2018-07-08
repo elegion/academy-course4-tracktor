@@ -12,7 +12,10 @@
     <string name="route_active">Маршрут активен!</string>
     <string name="permissions_denied">Вы не дали разрешения!</string>
     <string name="dont_stay">Не стойте на месте!</string>
-    <string name="permissions_request_title">Запрос разрешений на получение местоположения</string>
-    <string name="permissions_request_message">Нам необходимо знать Ваше местоположение, чтобы приложение работало</string>
-    <string name="ok">ОК</string>
+
+    <string name="permissions_request_title">Внимание!</string>
+    <string name="permissions_request_message">Для корректной работы приложения необходим доступ к местоположению. Для сохранения скриншотов необходим доступ к внешнему хранилищу</string>
+    <string name="ok">Понятно</string>
+    <string name="back_off">Приложение не может работать без доступа к местоположению</string>
+    <string name="notify_info">Время: %s\nРасстояние: %s "</string>
 </resources>

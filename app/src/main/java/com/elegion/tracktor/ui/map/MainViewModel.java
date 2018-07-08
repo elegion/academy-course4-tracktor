@@ -1,10 +1,9 @@
-package com.elegion.tracktor.viewmodel;
+package com.elegion.tracktor.ui.map;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.ViewModel;
 
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
-import com.elegion.tracktor.event.StopRouteClickEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
 import com.elegion.tracktor.util.StringUtil;
@@ -13,55 +12,46 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class CounterViewModel extends ViewModel {
+public class MainViewModel extends ViewModel {
 
     private MutableLiveData<Boolean> startEnabled = new MutableLiveData<>();
     private MutableLiveData<Boolean> stopEnabled = new MutableLiveData<>();
-    private MutableLiveData<String> timeText = new MutableLiveData<>();
-    private MutableLiveData<String> distanceText = new MutableLiveData<>();
 
-    public CounterViewModel() {
+    private MutableLiveData<String> mTimeText = new MutableLiveData<>();
+    private MutableLiveData<String> mDistanceText = new MutableLiveData<>();
+
+    public MainViewModel() {
         EventBus.getDefault().register(this);
+        startEnabled.setValue(true);
+        stopEnabled.setValue(false);
     }
 
-    public void startTimer() {
-        timeText.postValue("");
-        distanceText.postValue("");
-        startEnabled.postValue(false);
-        stopEnabled.postValue(true);
-    }
+    public void switchButtons() {
+        startEnabled.setValue(!startEnabled.getValue());
+        stopEnabled.setValue(!stopEnabled.getValue());
 
-    public void stopTimer() {
-        EventBus.getDefault().post(new StopRouteClickEvent());
-        startEnabled.postValue(true);
-        stopEnabled.postValue(false);
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStopRouteClick(StopRouteClickEvent event) {
-        startEnabled.postValue(true);
-        stopEnabled.postValue(false);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateTimer(UpdateTimerEvent event) {
-        timeText.postValue(StringUtil.getTimeText(event.getSeconds()));
+        mTimeText.postValue(StringUtil.getTimeText(event.getSeconds()));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateRoute(UpdateRouteEvent event) {
-        distanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
+        mDistanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
+
         startEnabled.postValue(false);
         stopEnabled.postValue(true);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onAddPositionToRoute(AddPositionToRouteEvent event) {
-        distanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
+        mDistanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
     }
 
     public MutableLiveData<String> getTimeText() {
-        return timeText;
+        return mTimeText;
     }
 
     public MutableLiveData<Boolean> getStartEnabled() {
@@ -73,12 +63,17 @@ public class CounterViewModel extends ViewModel {
     }
 
     public MutableLiveData<String> getDistanceText() {
-        return distanceText;
+        return mDistanceText;
     }
 
     @Override
     protected void onCleared() {
         EventBus.getDefault().unregister(this);
         super.onCleared();
+    }
+
+    public void clear() {
+        mTimeText.setValue("");
+        mDistanceText.setValue("");
     }
 }

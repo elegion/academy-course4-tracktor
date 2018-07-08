@@ -1,17 +1,17 @@
 package com.elegion.tracktor.service;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
@@ -21,9 +21,8 @@ import android.widget.Toast;
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.event.AddPositionToRouteEvent;
 import com.elegion.tracktor.event.GetRouteEvent;
-import com.elegion.tracktor.event.StartRouteEvent;
-import com.elegion.tracktor.event.StopRouteClickEvent;
-import com.elegion.tracktor.event.StopRouteEvent;
+import com.elegion.tracktor.event.StartTrackEvent;
+import com.elegion.tracktor.event.StopTrackEvent;
 import com.elegion.tracktor.event.UpdateRouteEvent;
 import com.elegion.tracktor.event.UpdateTimerEvent;
 import com.elegion.tracktor.ui.map.MainActivity;
@@ -51,70 +50,63 @@ import io.reactivex.schedulers.Schedulers;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class CounterService extends IntentService {
+public class CounterService extends Service {
 
     public static final String CHANNEL_ID = "counter_service";
     public static final String CHANNEL_NAME = "Counter Service";
-    public static final String ACTION_STOP = "ACTION_STOP";
     public static final int NOTIFICATION_ID = 101;
-    public static final int UPDATE_INTERVAL = 5000;
-    public static final int UPDATE_FASTEST_INTERVAL = 2000;
+    public static final int UPDATE_INTERVAL = 60_000;
+    public static final int UPDATE_FASTEST_INTERVAL = 5_000;
     public static final int UPDATE_MIN_DISTANCE = 20;
+    public static final int REQUEST_CODE_LAUNCH = 0;
 
-    public CounterService() {
-        super("CounterService");
-    }
-
-    public CounterService(String name) {
-        super(name);
-    }
-
-    private long mTime;
     private double mDistance;
     private Disposable mTimerDisposable;
     private List<LatLng> mRoute = new ArrayList<>();
 
-    private boolean isRouteStarted;
     private Location mLastLocation;
     private LatLng mLastPosition;
 
+    private NotificationCompat.Builder mNotificationBuilder;
+
     private FusedLocationProviderClient mFusedLocationClient;
-    private LocationRequest mLocationRequest = new LocationRequest();
+    private NotificationManager mNotificationManager;
     private LocationCallback mLocationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             if (locationResult != null) {
-                Location newLocation = locationResult.getLastLocation();
-                LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
 
-                if (isRouteStarted
-                        && mLastLocation != null
-                        && (mLastLocation.getLongitude() != newPosition.longitude
-                        || mLastLocation.getLatitude() != newPosition.latitude)) {
-                    LatLng lastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    if (mRoute.isEmpty() && mLastPosition != null) {
-                        mRoute.add(mLastPosition);
+                if (isFirstPoint()) {
+                    addPointToRoute(locationResult.getLastLocation());
+                    EventBus.getDefault().post(new StartTrackEvent(mLastPosition));
+
+                } else {
+
+                    Location newLocation = locationResult.getLastLocation();
+                    LatLng newPosition = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
+
+                    if (positionChanged(newPosition)) {
+                        mRoute.add(newPosition);
+                        LatLng prevPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                        mDistance += SphericalUtil.computeDistanceBetween(prevPosition, newPosition);
+                        EventBus.getDefault().post(new AddPositionToRouteEvent(prevPosition, newPosition, mDistance));
                     }
-                    mRoute.add(newPosition);
-                    mDistance += SphericalUtil.computeDistanceBetween(lastPosition, newPosition);
 
-                    EventBus.getDefault().post(new AddPositionToRouteEvent(lastPosition, newPosition, mDistance));
-                    setNotification(StringUtil.getTimeText(mTime), StringUtil.getDistanceText(mDistance));
+                    mLastLocation = newLocation;
+                    mLastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                 }
-
-                mLastLocation = newLocation;
-                mLastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             }
         }
     };
 
-    @Override
-    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        return START_STICKY;
+    private boolean positionChanged(LatLng newPosition) {
+        return mLastLocation.getLongitude() != newPosition.longitude || mLastLocation.getLatitude() != newPosition.latitude;
     }
 
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    private void addPointToRoute(Location lastLocation) {
+        mLastLocation = lastLocation;
+        mLastPosition = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        mRoute.add(mLastPosition);
     }
 
     @Override
@@ -122,76 +114,111 @@ public class CounterService extends IntentService {
         super.onCreate();
         EventBus.getDefault().register(this);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel();
-        }
-
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(UPDATE_FASTEST_INTERVAL);
-        mLocationRequest.setSmallestDisplacement(UPDATE_MIN_DISTANCE);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+
+            mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                createNotificationChannel();
+            }
+
+            Notification notification = buildNotification();
+            startForeground(NOTIFICATION_ID, notification);
+
+            final LocationRequest locationRequest = new LocationRequest()
+                    .setInterval(UPDATE_INTERVAL)
+                    .setFastestInterval(UPDATE_FASTEST_INTERVAL)
+                    .setSmallestDisplacement(UPDATE_MIN_DISTANCE)
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            mFusedLocationClient.requestLocationUpdates(locationRequest, mLocationCallback, null);
+
+            startTimer();
+
         } else {
             Toast.makeText(this, R.string.permissions_denied, Toast.LENGTH_SHORT).show();
         }
 
-        onStartRouteClick();
+    }
+
+    private void startTimer() {
+        mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(CounterService.this::onTimerUpdate);
+    }
+
+    private void onTimerUpdate(long totalSeconds) {
+        EventBus.getDefault().post(new UpdateTimerEvent(totalSeconds));
+
+        Notification notification = buildNotification(StringUtil.getTimeText(totalSeconds), StringUtil.getDistanceText(mDistance));
+        mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
     @Override
     public void onDestroy() {
+        EventBus.getDefault().post(new StopTrackEvent(mRoute));
+
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        mTimerDisposable.dispose();
+
+        stopForeground(true);
+
         EventBus.getDefault().unregister(this);
-        super.onDestroy();
     }
 
-    private void setNotification(String time, String distance) {
-        String message = time.isEmpty() ? "Мы не следим за вами!" : "Мы следим за вами!\nВремя: " + time + "\nРасстояние: " + distance;
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
+    private Notification buildNotification() {
+        return buildNotification("", "");
+    }
+
+    private Notification buildNotification(String time, String distance) {
+        if (mNotificationBuilder == null) {
+            configureNotificationBuilder();
+        }
+
+        String message = getString(R.string.notify_info, time, distance);
+
+        return mNotificationBuilder
+                .setContentText(message)
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
+                .build();
+
+    }
+
+    private void configureNotificationBuilder() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setAction(Intent.ACTION_MAIN);
         notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP
+                | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent contentIntent = PendingIntent.getActivity(
-                this, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                this, REQUEST_CODE_LAUNCH, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Intent stopIntent = new Intent(this, MainActivity.class);
-        stopIntent.setAction(ACTION_STOP);
-        stopIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent stopPendingIntent = PendingIntent.getActivity(this, 0, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+        mNotificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentIntent(contentIntent)
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_my_location_white_24dp)
                 .setWhen(System.currentTimeMillis())
                 .setContentTitle(getString(R.string.route_active))
-                .setContentText(message)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(message))
                 .setVibrate(new long[]{0})
-                .setColor(ContextCompat.getColor(this, R.color.colorAccent))
-                .addAction(R.drawable.ic_stop_black_24dp, getString(R.string.stopRoute), stopPendingIntent);
-
-        Notification notification = builder.build();
-
-        startForeground(NOTIFICATION_ID, notification);
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent));
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private void createNotificationChannel() {
-        NotificationChannel chan = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
-        chan.setLightColor(Color.BLUE);
-        chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.createNotificationChannel(chan);
-    }
-
-    private void onTimerUpdate(long totalSeconds) {
-        mTime = totalSeconds;
-
-        EventBus.getDefault().post(new UpdateTimerEvent(totalSeconds));
-        setNotification(StringUtil.getTimeText(mTime), StringUtil.getDistanceText(mDistance));
+        if (mNotificationManager != null && mNotificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+            NotificationChannel chan = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            mNotificationManager.createNotificationChannel(chan);
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -199,30 +226,8 @@ public class CounterService extends IntentService {
         EventBus.getDefault().post(new UpdateRouteEvent(mRoute, mDistance));
     }
 
-    @SuppressLint("MissingPermission")
-    public void onStartRouteClick() {
-        isRouteStarted = true;
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                mLastLocation = location;
-                mLastPosition = new LatLng(location.getLatitude(), location.getLongitude());
-                mRoute.add(mLastPosition);
-            }
-            EventBus.getDefault().post(new StartRouteEvent(mLastPosition));
-            mTimerDisposable = Observable.interval(1, TimeUnit.SECONDS)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(CounterService.this::onTimerUpdate);
-        });
+    public boolean isFirstPoint() {
+        return mRoute.size() == 0 && mLastLocation == null && mLastPosition == null;
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onStopRouteClick(StopRouteClickEvent event) {
-        EventBus.getDefault().post(new StopRouteEvent(mDistance, mTime, new ArrayList<>(mRoute)));
-        setNotification("", "");
-        isRouteStarted = false;
-        mRoute.clear();
-        mDistance = 0;
-        mTimerDisposable.dispose();
-    }
 }

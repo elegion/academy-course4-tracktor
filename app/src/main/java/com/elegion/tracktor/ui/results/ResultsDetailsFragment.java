@@ -19,7 +19,6 @@ import android.widget.TextView;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.util.ScreenshotMaker;
-import com.elegion.tracktor.util.StringUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,18 +32,21 @@ import static com.elegion.tracktor.ui.results.ResultsActivity.TIME_KEY;
  */
 public class ResultsDetailsFragment extends Fragment {
 
-    @BindView(R.id.tvTime) TextView mTimeText;
-    @BindView(R.id.tvDistance) TextView mDistanceText;
-    @BindView(R.id.ivScreenshot) ImageView mScreenshotImage;
+    @BindView(R.id.tvTime)
+    TextView mTimeText;
+    @BindView(R.id.tvDistance)
+    TextView mDistanceText;
+    @BindView(R.id.ivScreenshot)
+    ImageView mScreenshotImage;
 
     private Bitmap mImage;
 
     public static ResultsDetailsFragment newInstance(Bundle bundle) {
-        Bundle args = new Bundle();
-        args.putAll(bundle);
+//        Bundle args = new Bundle();
+//        args.putAll(bundle);
 
         ResultsDetailsFragment fragment = new ResultsDetailsFragment();
-        fragment.setArguments(args);
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -60,11 +62,11 @@ public class ResultsDetailsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
-        double distance = getArguments().getDouble(DISTANCE_KEY, 0.0);
-        long time = getArguments().getLong(TIME_KEY, 0);
+        String distance = getArguments().getString(DISTANCE_KEY, null);
+        String time = getArguments().getString(TIME_KEY, null);
 
-        mTimeText.setText(StringUtil.getTimeText(time));
-        mDistanceText.setText(StringUtil.getDistanceText(distance));
+        mTimeText.setText(time);
+        mDistanceText.setText(distance);
 
         mImage = ScreenshotMaker.fromBase64(getArguments().getString(SCREENSHOT_KEY));
         mScreenshotImage.setImageBitmap(mImage);
