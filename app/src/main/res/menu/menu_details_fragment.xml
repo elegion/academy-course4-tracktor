@@ -3,9 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/mi_results"
-        android:icon="@drawable/ic_menu_results"
-        android:title="@string/menu_item_results"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/actionShare"
+        android:title="@string/share"
+        app:showAsAction="never" />
 
 </menu>
