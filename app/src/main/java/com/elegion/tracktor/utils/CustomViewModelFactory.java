@@ -5,7 +5,7 @@ import android.arch.lifecycle.ViewModelProvider;
 import android.support.annotation.NonNull;
 
 import com.elegion.tracktor.data.IRepository;
-import com.elegion.tracktor.results.list.ResultsViewModel;
+import com.elegion.tracktor.ui.results.ResultsViewModel;
 
 /**
  * @author Azret Magometov
