@@ -1,4 +1,4 @@
-package com.elegion.tracktor.results.list;
+package com.elegion.tracktor.ui.results;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 
 import com.elegion.tracktor.R;
 import com.elegion.tracktor.data.RealmRepository;
-import com.elegion.tracktor.utils.CustomViewModelFactory;
+import com.elegion.tracktor.util.CustomViewModelFactory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
