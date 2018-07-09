@@ -69,6 +69,7 @@ public class ResultsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mResultsAdapter = new ResultsAdapter(mListener);
         mResultsViewModel.getTracks().observe(this, tracks -> mResultsAdapter.submitList(tracks));
+        mResultsViewModel.loadTracks();
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mResultsAdapter);

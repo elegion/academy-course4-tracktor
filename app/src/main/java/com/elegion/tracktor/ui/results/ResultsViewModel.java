@@ -17,9 +17,14 @@ public class ResultsViewModel extends ViewModel {
 
     private MutableLiveData<List<Track>> mTracks = new MutableLiveData<>();
 
-    public ResultsViewModel(IRepository repository){
+    public ResultsViewModel(IRepository repository) {
         mRepository = repository;
-        mTracks.postValue(mRepository.getAll());
+    }
+
+    public void loadTracks() {
+        if (mTracks.getValue() == null || mTracks.getValue().isEmpty()) {
+            mTracks.postValue(mRepository.getAll());
+        }
     }
 
     public MutableLiveData<List<Track>> getTracks() {
