@@ -58,7 +58,7 @@ public class CounterService extends Service {
     public static final String CHANNEL_ID = "counter_service";
     public static final String CHANNEL_NAME = "Counter Service";
     public static final int NOTIFICATION_ID = 101;
-    public static final int UPDATE_INTERVAL = 60_000;
+    public static final int UPDATE_INTERVAL = 15_000;
     public static final int UPDATE_FASTEST_INTERVAL = 5_000;
     public static final int UPDATE_MIN_DISTANCE = 20;
     public static final int REQUEST_CODE_LAUNCH = 0;
@@ -157,7 +157,7 @@ public class CounterService extends Service {
     }
 
     private void onTimerUpdate(long totalSeconds) {
-        EventBus.getDefault().post(new UpdateTimerEvent(totalSeconds));
+        EventBus.getDefault().post(new UpdateTimerEvent(totalSeconds, mDistance));
 
         Notification notification = buildNotification(StringUtil.getTimeText(totalSeconds), StringUtil.getDistanceText(mDistance));
         mNotificationManager.notify(NOTIFICATION_ID, notification);

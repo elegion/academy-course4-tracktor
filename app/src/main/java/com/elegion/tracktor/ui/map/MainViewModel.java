@@ -40,7 +40,9 @@ public class MainViewModel extends ViewModel {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateTimer(UpdateTimerEvent event) {
         mTimeText.postValue(StringUtil.getTimeText(event.getSeconds()));
+        mDistanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
         duration = event.getSeconds();
+        distanse = event.getDistance();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
