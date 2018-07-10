@@ -31,6 +31,7 @@ public class ResultsActivity extends SingleFragmentActivity implements ResultsFr
             return ResultsFragment.newInstance();
     }
 
+    //eventbus ?
     @Override
     public void onClick(long trackId) {
         changeFragment(ResultsDetailsFragment.newInstance(trackId));

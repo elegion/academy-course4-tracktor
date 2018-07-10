@@ -165,6 +165,7 @@ public class CounterService extends Service {
         if (mShutDownDuration != -1 && totalSeconds == mShutDownDuration) {
             EventBus.getDefault().post(new StopBtnClickedEvent());
             //configure btns state
+            //from notification
         }
 
     }
