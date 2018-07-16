@@ -26,7 +26,7 @@
     <string name="pref_key_shutdown">shutdown</string>
     <string name="pref_key_weight">weight</string>
     <string name="pref_default_value_unit">1</string>
-    <string name="pref_default_value_shutdown">0</string>
+    <string name="pref_default_value_shutdown">-1</string>
     <string name="pref_default_value_weight">60</string>
     <string name="btn_delete_result">Удалить</string>
 
