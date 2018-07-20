@@ -21,8 +21,9 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> mTimeText = new MutableLiveData<>();
     private MutableLiveData<String> mDistanceText = new MutableLiveData<>();
 
-    private long duration;
-    private double distanse;
+    private long mDurationRaw;
+    private double mDistanceRaw;
+
     private RealmRepository mRealmRepository;
 
     public MainViewModel() {
@@ -41,14 +42,14 @@ public class MainViewModel extends ViewModel {
     public void onUpdateTimer(UpdateTimerEvent event) {
         mTimeText.postValue(StringUtil.getTimeText(event.getSeconds()));
         mDistanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
-        duration = event.getSeconds();
-        distanse = event.getDistance();
+        mDurationRaw = event.getSeconds();
+        mDistanceRaw = event.getDistance();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onUpdateRoute(UpdateRouteEvent event) {
         mDistanceText.postValue(StringUtil.getDistanceText(event.getDistance()));
-        distanse = event.getDistance();
+        mDistanceRaw = event.getDistance();
 
         startEnabled.postValue(false);
         stopEnabled.postValue(true);
@@ -88,6 +89,6 @@ public class MainViewModel extends ViewModel {
 
     public long saveResults(String base54image) {
 
-        return mRealmRepository.createAndInsertTrackFrom(duration, distanse, base54image);
+        return mRealmRepository.createAndInsertTrackFrom(mDurationRaw, mDistanceRaw, base54image);
     }
 }

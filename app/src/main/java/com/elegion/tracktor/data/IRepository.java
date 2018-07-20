@@ -1,7 +1,5 @@
 package com.elegion.tracktor.data;
 
-import com.elegion.tracktor.data.model.Track;
-
 import java.util.List;
 
 /**
@@ -17,6 +15,6 @@ public interface IRepository<T> {
 
     boolean deleteItem(long id);
 
-    void updateItem(Track track);
+    void updateItem(T t);
 
 }
