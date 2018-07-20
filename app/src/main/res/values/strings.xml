@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Tracktor</string>
+    <string name="timeLabel">Время:</string>
+    <string name="distanceLabel">Расстояние:</string>
+    <string name="start">Старт</string>
+    <string name="end">Конец</string>
+    <string name="stop">Стоп</string>
+    <string name="statistic">Статистика</string>
+    <string name="share">Поделиться</string>
+    <string name="settings">Настройки</string>
+    <string name="stopRoute">Закончить маршрут</string>
+    <string name="route_active">Маршрут активен!</string>
+    <string name="permissions_denied">Вы не дали разрешения!</string>
+    <string name="dont_stay">Не стойте на месте!</string>
+
+    <string name="menu_item_about">О приложении</string>
+    <string name="title_activity_preference">Настройки</string>
+    <string name="title_distance_unit">Единица измерения</string>
+    <string name="dialog_title_distance_unit">Выберите единицу измерения</string>
+    <string name="title_auto_shutdown">Автоотключение</string>
+    <string name="dialog_title_auto_shutdown">Выберите время автоотключения</string>
+    <string name="title_user_weight">Вес пользователя</string>
+    <string name="dialog_title_user_weight">Вес пользователя</string>
+
+    <string name="pref_key_unit">unit</string>
+    <string name="pref_key_shutdown">shutdown</string>
+    <string name="pref_key_weight">weight</string>
+    <string name="pref_default_value_unit">1</string>
+    <string name="pref_default_value_shutdown">-1</string>
+    <string name="pref_default_value_weight">60</string>
+    <string name="btn_delete_result">Удалить</string>
+
+    <string name="permissions_request_title">Внимание!</string>
+    <string name="permissions_request_message">Для корректной работы приложения необходим доступ к местоположению. Для сохранения скриншотов необходим доступ к внешнему хранилищу</string>
+    <string name="ok">Понятно</string>
+    <string name="back_off">Приложение не может работать без доступа к местоположению</string>
+    <string name="notify_info">Время: %s\nРасстояние: %s "</string>
+</resources>

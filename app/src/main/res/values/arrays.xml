@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="entries_list_preference_unit">
+        <item>Километры</item>
+        <item>Мили</item>
+    </string-array>
+
+    <string-array name="entryvalues_list_preference_unit">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="entries_list_preference_shutdown">
+        <item>Никогда</item>
+        <item>10 минут</item>
+        <item>30 минут</item>
+        <item>60 минут</item>
+    </string-array>
+
+    <string-array name="entryvalues_list_preference_shutdown">
+        <item>  -1</item>
+        <item> 600</item>
+        <item>1800</item>
+        <item>3600</item>
+    </string-array>
+
+</resources>
